@@ -8,7 +8,7 @@ import { useMotionReady } from '@/shared/lib/use-motion-ready';
 import { type WowClass } from '@/shared/lib/wow-classes';
 import { SpecBlock } from '@/shared/ui/spec-block';
 
-export function ClassView({ wowClass }: { wowClass: WowClass }) {
+export const ClassView = ({ wowClass }: { wowClass: WowClass }) => {
 	const motionReady = useMotionReady();
 
 	return (
@@ -71,4 +71,4 @@ export function ClassView({ wowClass }: { wowClass: WowClass }) {
 			</div>
 		</div>
 	);
-}
+};

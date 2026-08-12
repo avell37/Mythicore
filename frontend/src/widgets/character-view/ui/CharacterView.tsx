@@ -1,0 +1,32 @@
+'use client';
+
+import { isAxiosError } from 'axios';
+import { useGetCharacterQuery } from '@/entities/character/hooks/useCharacterQuery';
+import { useCharacterDocumentTitle } from '@/entities/character/hooks/useCharacterDocumentTitle';
+import type { CharacterProps } from '@/entities/character/model/Character';
+import { useMotionReady } from '@/shared/lib/use-motion-ready';
+import { CharacterError } from './CharacterError';
+import { CharacterProfile } from './CharacterProfile';
+import { CharacterViewSkeleton } from './CharacterViewSkeleton';
+
+export const CharacterView = ({ region, realm, name }: CharacterProps) => {
+	const motionReady = useMotionReady();
+	const { data, isPending, isError, error } = useGetCharacterQuery({
+		region,
+		realm,
+		name,
+	});
+
+	useCharacterDocumentTitle(data);
+
+	if (isPending) {
+		return <CharacterViewSkeleton />;
+	}
+
+	if (isError || !data) {
+		const status = isAxiosError(error) ? error.response?.status : undefined;
+		return <CharacterError notFound={status === 404} />;
+	}
+
+	return <CharacterProfile character={data} region={region} motionReady={motionReady} />;
+};

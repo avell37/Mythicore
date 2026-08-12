@@ -10,7 +10,7 @@ import { WOW_CLASSES } from '@/shared/lib/wow-classes';
 import { cn } from '@/shared/lib/utils';
 import { SidebarProps } from '../types/sidebar.types';
 
-export function Sidebar({ open, onClose, onFindCharacter }: SidebarProps) {
+export const Sidebar = ({ open, onClose, onFindCharacter }: SidebarProps) => {
 	const pathname = usePathname();
 	const motionReady = useMotionReady();
 
@@ -131,4 +131,4 @@ export function Sidebar({ open, onClose, onFindCharacter }: SidebarProps) {
 			</aside>
 		</>
 	);
-}
+};

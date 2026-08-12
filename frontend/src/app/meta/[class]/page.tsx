@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getWowClass } from '@/shared/lib/wow-classes';
-import { ClassView } from '@/widgets/class-view/class-view';
+import { ClassView } from '@/widgets/class-view/ClassView';
 
 export async function generateMetadata({
 	params,

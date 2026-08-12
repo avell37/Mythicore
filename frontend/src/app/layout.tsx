@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Fira_Sans } from 'next/font/google';
-import { AppShell } from '@/widgets/sidebar/ui/app-shell';
+import { AppShell } from '@/widgets/sidebar/ui/AppShell';
 import { Providers } from '../shared/providers/providers';
 import './globals.css';
 
