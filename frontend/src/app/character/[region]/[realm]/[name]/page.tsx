@@ -1,12 +1,30 @@
-export default function CharacterPlaceholder() {
-	return (
-		<div className="mx-auto flex min-h-[60vh] max-w-3xl flex-col justify-center px-6 py-16">
-			<p className="mb-3 text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-				Character
-			</p>
-			<h1 className="text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl">
-				Profile coming...
-			</h1>
-		</div>
-	);
-}
+import { CharacterView } from '@/widgets/character-view';
+import type { Metadata } from 'next';
+
+export const generateMetadata = async ({
+	params,
+}: {
+	params: Promise<{ region: string; realm: string; name: string }>;
+}): Promise<Metadata> => {
+	const { region, realm, name } = await params;
+
+	if (!region && !realm && !name) {
+		return { title: 'Character not found · Mythicore' };
+	}
+
+	return {
+		title: `${name} · Mythicore`,
+	};
+};
+
+const CharacterPage = async ({
+	params,
+}: {
+	params: Promise<{ region: string; realm: string; name: string }>;
+}) => {
+	const { region, realm, name } = await params;
+
+	return <CharacterView region={region} realm={realm} name={name} />;
+};
+
+export default CharacterPage;

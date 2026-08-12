@@ -489,9 +489,13 @@ export const REGIONS = [
 	{ value: 'tw', label: 'TW' },
 ] as const;
 
-export function getWowClass(slug: string): WowClass | undefined {
-	return WOW_CLASSES.find((wowClass) => wowClass.slug === slug);
-}
+export const getWowClass = (slug: string): WowClass | undefined =>
+	WOW_CLASSES.find((wowClass) => wowClass.slug === slug);
+
+export const getWowClassByName = (name: string): WowClass | undefined => {
+	const normalized = name.trim().toLowerCase();
+	return WOW_CLASSES.find((wowClass) => wowClass.name.toLowerCase() === normalized);
+};
 
 export const ROLE_LABEL: Record<WowRole, string> = {
 	tank: 'Tank',

@@ -1,10 +1,10 @@
 'use client';
 
 import { Menu } from 'lucide-react';
-import { Sidebar } from '@/widgets/sidebar/ui/sidebar';
 import { useAppShell } from '../hooks/useAppShell';
+import { Sidebar } from './Sidebar';
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export const AppShell = ({ children }: { children: React.ReactNode }) => {
 	const { sidebarOpen, lookupRef, focusLookup, setSidebarOpen } = useAppShell();
 
 	return (
@@ -38,4 +38,4 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 			</div>
 		</div>
 	);
-}
+};

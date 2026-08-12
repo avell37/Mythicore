@@ -6,7 +6,7 @@ import { REGIONS } from '@/shared/lib/wow-classes';
 import { cn } from '@/shared/lib/utils';
 import { useCharacterLookup } from '../hooks/useCharacterLookup';
 
-export function CharacterLookup({ formId = 'character-lookup' }: { formId?: string }) {
+export const CharacterLookup = ({ formId = 'character-lookup' }: { formId?: string }) => {
 	const { region, realm, name, motionReady, fieldClass, setRegion, setRealm, setName, onSubmit } =
 		useCharacterLookup();
 
@@ -85,4 +85,4 @@ export function CharacterLookup({ formId = 'character-lookup' }: { formId?: stri
 			</button>
 		</motion.form>
 	);
-}
+};
