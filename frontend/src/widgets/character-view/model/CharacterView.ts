@@ -1,4 +1,8 @@
-import { Character } from '@/entities/character';
+import {
+	Character,
+	CharacterEquipment,
+	CharacterMedia,
+} from '@/entities/character/model/Character';
 import { WowClass } from '@/shared/lib/wow-classes';
 import { LucideIcon } from 'lucide-react';
 
@@ -23,12 +27,15 @@ export type CharacterHeroProps = {
 	region: string;
 	accent: string;
 	wowClass?: WowClass;
+	media?: CharacterMedia;
 };
 
 export type CharacterProfileProps = {
 	character: Character;
 	region: string;
 	motionReady: boolean;
+	media?: CharacterMedia;
+	equip?: CharacterEquipment;
 };
 
 export type CharacterStatsProps = {

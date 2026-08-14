@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { CharacterStatsProps } from '../model/CharacterView';
 
 export const CharacterStats = ({ stats, accent, motionReady }: CharacterStatsProps) => (
-	<section className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+	<section className="mb-6 grid grid-cols-2 gap-2.5 sm:mb-8 sm:gap-3 lg:grid-cols-4">
 		{stats.map((stat, index) => (
 			<motion.div
 				key={stat.label}

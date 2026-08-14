@@ -12,7 +12,7 @@ export const CharacterViewSkeleton = () => (
 			</div>
 		</div>
 		<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-			{Array.from({ length: 4 }).map((_, index) => (
+			{Array.from({ length: 4 }).map((el, index) => (
 				<div key={index} className="h-24 animate-pulse rounded-xl bg-muted/40" />
 			))}
 		</div>
