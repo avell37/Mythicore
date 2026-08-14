@@ -1,7 +1,18 @@
-export const blizzardBase = ['blizzard'] as const;
+export const characterBase = ['character'] as const;
 
-export const blizzardKeys = {
-	all: blizzardBase,
+export const characterKeys = {
+	all: characterBase,
 	getCharacter: ({ region, realm, name }: { region: string; realm: string; name: string }) =>
-		[...blizzardBase, region, realm, name] as const,
+		[...characterBase, region, realm, name] as const,
+	getCharacterMedia: ({ region, realm, name }: { region: string; realm: string; name: string }) =>
+		[...characterBase, 'media', region, realm, name] as const,
+	getCharacterEquipment: ({
+		region,
+		realm,
+		name,
+	}: {
+		region: string;
+		realm: string;
+		name: string;
+	}) => [...characterBase, 'equipment', region, realm, name] as const,
 };

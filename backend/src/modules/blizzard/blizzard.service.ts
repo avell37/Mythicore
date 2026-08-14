@@ -1,8 +1,7 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BlizzardTokenResponse } from './types/blizzard.types';
 import { RedisService } from 'src/core/redis/redis.service';
-import { normalizeName, normalizeRealm, normalizeRegion } from 'src/shared/utils/normalize';
 
 @Injectable()
 export class BlizzardService {
@@ -11,39 +10,60 @@ export class BlizzardService {
 		private readonly redis: RedisService,
 	) {}
 
-	async getCharacterSummary(region, realm, name) {
-		const normalizedRegion = normalizeRegion(region);
-		const normalizedRealm = normalizeRealm(realm);
-		const normalizedName = normalizeName(name);
-
-		const cacheKey = `char:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
-
-		const cached = await this.redis.getJson(cacheKey);
-		if (cached) return cached;
-
+	async fetchCharacterSummary(region: string, realm: string, name: string) {
 		const token = await this.getAccessToken();
 
 		const response = await fetch(
-			`https://${normalizedRegion}.api.blizzard.com/profile/wow/character/${normalizedRealm}/${encodeURIComponent(normalizedName)}?namespace=profile-${normalizedRegion}&locale=en_US`,
+			`https://${region}.api.blizzard.com/profile/wow/character/${realm}/${encodeURIComponent(name)}?namespace=profile-${region}&locale=en_US`,
 			{
 				method: 'GET',
 				headers: { Authorization: `Bearer ${token}` },
 			},
 		);
 
-		if (!response.ok) {
-			const text = await response.text();
-			throw new NotFoundException({
-				status: 404,
-				message: `Blizzard Character failed. Status: ${response.status}. Error: ${text}`,
-			});
-		}
+		return response;
+	}
 
-		const data = await response.json();
+	async fetchCharacterMedia(region: string, realm: string, name: string) {
+		const token = await this.getAccessToken();
 
-		await this.redis.setJson(cacheKey, data, 900);
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/profile/wow/character/${realm}/${encodeURIComponent(name)}/character-media?namespace=profile-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
 
-		return data;
+		return response;
+	}
+
+	async fetchCharacterEquipment(region: string, realm: string, name: string) {
+		const token = await this.getAccessToken();
+
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/profile/wow/character/${realm}/${encodeURIComponent(name)}/equipment?namespace=profile-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
+
+		return response;
+	}
+
+	async fetchItemMedia(region: string, itemId: number) {
+		const token = await this.getAccessToken();
+
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/data/wow/media/item/${itemId}?namespace=static-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
+
+		return response;
 	}
 
 	private async getAccessToken(): Promise<string> {

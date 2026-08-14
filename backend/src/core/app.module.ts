@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { BlizzardModule } from 'src/modules/blizzard/blizzard.module';
+import { CharacterModule } from 'src/modules/character/character.module';
 
 @Module({
 	imports: [
@@ -11,6 +12,7 @@ import { BlizzardModule } from 'src/modules/blizzard/blizzard.module';
 			envFilePath: ['.env.development', '.env'],
 		}),
 		BlizzardModule,
+		CharacterModule,
 		PrismaModule,
 		RedisModule,
 	],

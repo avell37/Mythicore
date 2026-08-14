@@ -5,25 +5,36 @@ import { Crosshair } from 'lucide-react';
 import { getFactionAccent } from '@/entities/character/lib/format';
 import { CharacterHeroProps } from '../model/CharacterView';
 
-export const CharacterHero = ({ character, region, accent, wowClass }: CharacterHeroProps) => {
+export const CharacterHero = ({
+	character,
+	region,
+	accent,
+	wowClass,
+	media,
+}: CharacterHeroProps) => {
+	const portrait = media?.avatar ?? media?.inset ?? null;
 	const factionAccent = getFactionAccent(character.faction?.type);
 
 	return (
-		<header className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-start">
-			<div className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl ring-1 ring-white/10 sm:size-28">
-				<div
-					className="absolute inset-0 opacity-40"
-					style={{
-						background: `linear-gradient(145deg, ${accent}55, transparent 65%)`,
-					}}
-				/>
-				{wowClass ? (
+		<header className="mb-6 flex flex-col gap-5 sm:mb-10 sm:flex-row sm:items-start sm:gap-6">
+			<div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl ring-1 ring-white/10 sm:size-28">
+				{portrait ? (
+					<Image
+						src={portrait}
+						alt=""
+						width={224}
+						height={224}
+						quality={92}
+						className="relative size-full object-cover"
+						priority
+					/>
+				) : wowClass ? (
 					<Image
 						src={wowClass.icon}
 						alt=""
 						width={112}
 						height={112}
-						className="relative size-full object-cover"
+						className="relative size-14 object-contain"
 						priority
 					/>
 				) : (
@@ -36,7 +47,7 @@ export const CharacterHero = ({ character, region, accent, wowClass }: Character
 					{region.toUpperCase()} · {character.realm.name}
 				</p>
 				<h1
-					className="text-[clamp(2.25rem,5vw,3.5rem)] leading-none font-semibold tracking-[-0.045em]"
+					className="text-[clamp(2rem,7vw,3.5rem)] leading-none font-semibold tracking-[-0.045em]"
 					style={{ color: accent }}
 				>
 					{character.name}
@@ -47,7 +58,7 @@ export const CharacterHero = ({ character, region, accent, wowClass }: Character
 					<span className="font-medium">{character.character_class.name}</span>
 					<span className="text-muted-foreground"> · Level {character.level}</span>
 				</p>
-				<div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+				<div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:mt-4">
 					<span className="inline-flex items-center gap-2">
 						<span
 							className="size-1.5 rounded-full"
