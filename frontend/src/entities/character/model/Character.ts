@@ -13,6 +13,24 @@ export type ItemStat = {
 	isNegated?: boolean;
 };
 
+export type ItemSocket = {
+	type: string;
+	name?: string;
+	itemId?: number;
+	itemName?: string;
+	display?: string;
+	icon: string | null;
+};
+
+export type ItemEnchantment = {
+	id: number;
+	display: string;
+	slot: string;
+	sourceItemId?: number;
+	sourceItemName?: string;
+	icon: string | null;
+};
+
 export interface Character {
 	id: number;
 	name: string;
@@ -68,11 +86,8 @@ export interface EquippedItem {
 	binding: string | null;
 	armor: number | null;
 	stats: ItemStat[];
-	sockets: {
-		type: string;
-		itemId?: number;
-		icon?: string | null;
-	}[];
+	enchantments: ItemEnchantment[];
+	sockets: ItemSocket[];
 	set: {
 		name: string;
 		equipped: number;

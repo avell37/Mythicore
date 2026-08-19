@@ -6,6 +6,7 @@ import type {
 	CharacterMedia,
 	CharacterProps,
 } from '../model/Character';
+import type { CharacterBuild } from '../model/CharacterTalents';
 
 export const getCharacterApi = async ({
 	region,
@@ -32,6 +33,17 @@ export const getCharacterEquipmentApi = async ({
 }: CharacterProps): Promise<CharacterEquipment> => {
 	const { data } = await baseAxios.get(
 		`${API_URL.character()}/${region}/${realm}/${name}/equipment`,
+	);
+	return data;
+};
+
+export const getCharacterTalentsApi = async ({
+	region,
+	realm,
+	name,
+}: CharacterProps): Promise<CharacterBuild> => {
+	const { data } = await baseAxios.get(
+		`${API_URL.character()}/${region}/${realm}/${name}/specializations`,
 	);
 	return data;
 };

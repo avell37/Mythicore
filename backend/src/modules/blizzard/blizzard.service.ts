@@ -66,6 +66,76 @@ export class BlizzardService {
 		return response;
 	}
 
+	async fetchCharacterSpecializations(region: string, realm: string, name: string) {
+		const token = await this.getAccessToken();
+
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/profile/wow/character/${realm}/${encodeURIComponent(name)}/specializations?namespace=profile-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
+
+		return response;
+	}
+
+	async fetchTalentTree(region, treeId, specId) {
+		const token = await this.getAccessToken();
+
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/data/wow/talent-tree/${treeId}/playable-specialization/${specId}?namespace=static-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
+
+		return response;
+	}
+
+	async fetchHeroTalentTree(region, treeId, heroTreeId) {
+		const token = await this.getAccessToken();
+
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/data/wow/talent-tree/${treeId}/hero-talent/${heroTreeId}?namespace=static-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
+
+		return response;
+	}
+
+	async fetchSpellMedia(region, spellId) {
+		const token = await this.getAccessToken();
+
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/data/wow/media/spell/${spellId}?namespace=static-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
+
+		return response;
+	}
+
+	async fetchTalentTreeIndex(region) {
+		const token = await this.getAccessToken();
+
+		const response = await fetch(
+			`https://${region}.api.blizzard.com/data/wow/talent-tree/index?namespace=static-${region}&locale=en_US`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${token}` },
+			},
+		);
+
+		return response;
+	}
+
 	private async getAccessToken(): Promise<string> {
 		const cached = await this.redis.get('blizzard:token');
 

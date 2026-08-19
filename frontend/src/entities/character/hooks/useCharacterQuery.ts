@@ -9,8 +9,10 @@ import {
 	getCharacterApi,
 	getCharacterEquipmentApi,
 	getCharacterMediaApi,
+	getCharacterTalentsApi,
 } from '../api/character.api';
 import { characterKeys } from '@/shared/api/query-keys';
+import { CharacterBuild } from '../model/CharacterTalents';
 
 export const useGetCharacterQuery = ({ region, realm, name }: CharacterProps) =>
 	useQuery<Character>({
@@ -30,5 +32,12 @@ export const useGetCharacterEquipmentQuery = ({ region, realm, name }: Character
 	useQuery<CharacterEquipment>({
 		queryKey: characterKeys.getCharacterEquipment({ region, realm, name }),
 		queryFn: () => getCharacterEquipmentApi({ region, realm, name }),
+		enabled: Boolean(region && realm && name),
+	});
+
+export const useGetCharacterTalentsQuery = ({ region, realm, name }: CharacterProps) =>
+	useQuery<CharacterBuild>({
+		queryKey: characterKeys.getCharacterTalents({ region, realm, name }),
+		queryFn: () => getCharacterTalentsApi({ region, realm, name }),
 		enabled: Boolean(region && realm && name),
 	});

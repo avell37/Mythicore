@@ -1,3 +1,4 @@
+import { CharacterBuild } from '@/entities/character/model/CharacterTalents';
 import {
 	Character,
 	CharacterEquipment,
@@ -36,6 +37,9 @@ export type CharacterProfileProps = {
 	motionReady: boolean;
 	media?: CharacterMedia;
 	equip?: CharacterEquipment;
+	build?: CharacterBuild;
+	isBuildPending?: boolean;
+	isBuildError?: boolean;
 };
 
 export type CharacterStatsProps = {

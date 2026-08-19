@@ -5,6 +5,7 @@ import {
 	useGetCharacterEquipmentQuery,
 	useGetCharacterMediaQuery,
 	useGetCharacterQuery,
+	useGetCharacterTalentsQuery,
 } from '@/entities/character/hooks/useCharacterQuery';
 import type { CharacterProps } from '@/entities/character/model/Character';
 import { useMotionReady } from '@/shared/lib/use-motion-ready';
@@ -29,6 +30,15 @@ export const CharacterView = ({ region, realm, name }: CharacterProps) => {
 		realm,
 		name,
 	});
+	const {
+		data: build,
+		isPending: isBuildPending,
+		isError: isBuildError,
+	} = useGetCharacterTalentsQuery({
+		region,
+		realm,
+		name,
+	});
 
 	if (isPending) {
 		return <CharacterViewSkeleton />;
@@ -46,6 +56,9 @@ export const CharacterView = ({ region, realm, name }: CharacterProps) => {
 			motionReady={motionReady}
 			media={media}
 			equip={equip}
+			build={build}
+			isBuildPending={isBuildPending}
+			isBuildError={isBuildError}
 		/>
 	);
 };

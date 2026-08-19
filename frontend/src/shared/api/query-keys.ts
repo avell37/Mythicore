@@ -15,4 +15,13 @@ export const characterKeys = {
 		realm: string;
 		name: string;
 	}) => [...characterBase, 'equipment', region, realm, name] as const,
+	getCharacterTalents: ({
+		region,
+		realm,
+		name,
+	}: {
+		region: string;
+		realm: string;
+		name: string;
+	}) => [...characterBase, 'talents', region, realm, name] as const,
 };
