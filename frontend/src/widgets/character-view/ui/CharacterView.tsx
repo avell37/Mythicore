@@ -4,6 +4,7 @@ import { isAxiosError } from 'axios';
 import {
 	useGetCharacterEquipmentQuery,
 	useGetCharacterMediaQuery,
+	useGetCharacterMythicQuery,
 	useGetCharacterQuery,
 	useGetCharacterTalentsQuery,
 } from '@/entities/character/hooks/useCharacterQuery';
@@ -39,6 +40,15 @@ export const CharacterView = ({ region, realm, name }: CharacterProps) => {
 		realm,
 		name,
 	});
+	const {
+		data: pve,
+		isPending: isPvePending,
+		isError: isPveError,
+	} = useGetCharacterMythicQuery({
+		region,
+		realm,
+		name,
+	});
 
 	if (isPending) {
 		return <CharacterViewSkeleton />;
@@ -59,6 +69,9 @@ export const CharacterView = ({ region, realm, name }: CharacterProps) => {
 			build={build}
 			isBuildPending={isBuildPending}
 			isBuildError={isBuildError}
+			pve={pve}
+			isPvePending={isPvePending}
+			isPveError={isPveError}
 		/>
 	);
 };

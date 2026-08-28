@@ -2,19 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { RedisService } from 'src/core/redis/redis.service';
 import { normalizeName, normalizeRealm, normalizeRegion } from 'src/shared/utils/normalize';
 import { BlizzardService } from '../blizzard/blizzard.service';
-import {
-	mapBuild,
-	mapEquipment,
-	nodesOfHero,
-	parseTalentTreeHref,
-	throwBlizzardError,
-} from './utils/character-utils';
+
+import { RaiderService } from '../raider/raider.service';
+import { mapPve } from './utils/map-pve';
+import { throwBlizzardError, throwRaiderError } from './utils/http-errors';
+import { mapEquipment } from './utils/map-equipment';
+import { mapBuild, nodesOfHero, parseTalentTreeHref } from './utils/map-build';
 
 @Injectable()
 export class CharacterService {
 	constructor(
 		private readonly redis: RedisService,
 		private readonly blizzard: BlizzardService,
+		private readonly raider: RaiderService,
 	) {}
 
 	async getCharacterSummary(region, realm, name) {
@@ -203,7 +203,9 @@ export class CharacterService {
 			treeId,
 			heroTreeId: hero?.heroTreeId ?? null,
 			heroName:
-				data.active_hero_talent_tree?.name ?? loadout?.selected_hero_talent_tree?.name ?? null,
+				data.active_hero_talent_tree?.name ??
+				loadout?.selected_hero_talent_tree?.name ??
+				null,
 		};
 	}
 
@@ -212,7 +214,7 @@ export class CharacterService {
 		const normalizedRealm = normalizeRealm(realm);
 		const normalizedName = normalizeName(name);
 
-		const cacheKey = `char:build:v2:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
+		const cacheKey = `char:build:v3:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
 		const cached = await this.redis.getJson(cacheKey);
 		if (cached) return cached;
 
@@ -238,7 +240,12 @@ export class CharacterService {
 		const ids = [
 			...new Set(
 				trees
-					.flatMap((tree) => tree.nodes.map((n) => n.spellId))
+					.flatMap((tree) =>
+						tree.nodes.flatMap((n) => [
+							n.spellId,
+							...(n.choices ?? []).map((choice) => choice.spellId),
+						]),
+					)
 					.filter((id): id is number => typeof id === 'number'),
 			),
 		];
@@ -249,16 +256,58 @@ export class CharacterService {
 				for (const tree of trees) {
 					for (const node of tree.nodes) {
 						if (node.spellId === spellId) node.icon = icon;
+						for (const choice of node.choices ?? []) {
+							if (choice.spellId === spellId) choice.icon = icon;
+						}
 					}
 				}
 			}),
 		);
 
-		const missingIcons = trees.some((tree) => tree.nodes.some((n) => n.spellId && !n.icon));
+		const missingIcons = trees.some((tree) =>
+			tree.nodes.some(
+				(n) =>
+					(n.spellId && !n.icon) ||
+					(n.choices ?? []).some((choice) => choice.spellId && !choice.icon),
+			),
+		);
 		const ttl = missingIcons ? 45 : 900;
 		await this.redis.setJson(cacheKey, build, ttl);
 
 		return build;
+	}
+
+	async getCharacterMythicStats(region, realm, name) {
+		const normalizedRegion = normalizeRegion(region);
+		const normalizedRealm = normalizeRealm(realm);
+		const normalizedName = normalizeName(name);
+
+		const cacheKey = `char:mythic:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
+
+		const cached = await this.redis.getJson(cacheKey);
+		if (cached) return cached;
+
+		const response = await this.raider.fetchCharacterMythicStats(
+			normalizedRegion,
+			normalizedRealm,
+			normalizedName,
+		);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				const empty = mapPve({});
+				await this.redis.setJson(cacheKey, empty, 900);
+				return empty;
+			}
+			await throwRaiderError(response, 'character-profile');
+		}
+
+		const data = await response.json();
+		const pve = mapPve(data);
+
+		await this.redis.setJson(cacheKey, pve, 900);
+
+		return pve;
 	}
 
 	private async resolveTreeIdFromIndex(region: string, specId: number) {

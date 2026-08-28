@@ -10,14 +10,16 @@ export const TalentTreePanel = ({
 	accent,
 	icon,
 	centerRows = false,
+	pickedOnly = false,
 }: {
 	tree: TalentTreeView;
 	accent: string;
 	icon?: string | null;
 	centerRows?: boolean;
+	pickedOnly?: boolean;
 }) => {
-	const layout = centerRows ? null : getTreeLayout(tree.nodes);
-	const centeredRows = centerRows ? getCenteredRows(tree.nodes) : null;
+	const layout = centerRows ? null : getTreeLayout(tree.nodes, pickedOnly);
+	const centeredRows = centerRows ? getCenteredRows(tree.nodes, pickedOnly) : null;
 	const isEmpty = centerRows
 		? !centeredRows?.some((row) => row.length > 0)
 		: !layout?.items.length;

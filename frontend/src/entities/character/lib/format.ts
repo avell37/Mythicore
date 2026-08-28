@@ -16,6 +16,12 @@ export const getFactionAccent = (factionType?: string): string => {
 	return '#7b5cff';
 };
 
+export const formatNameFromParam = (name: string): string => {
+	const decoded = decodeURIComponent(name).trim();
+	if (!decoded) return decoded;
+	return decoded.charAt(0).toUpperCase() + decoded.slice(1);
+};
+
 export const buildCharacterDocumentTitle = (character: Character): string =>
 	[
 		character.name,

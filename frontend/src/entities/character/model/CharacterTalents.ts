@@ -1,3 +1,11 @@
+export type TalentChoice = {
+	name: string;
+	spellId?: number;
+	description?: string;
+	icon: string | null;
+	selected: boolean;
+};
+
 export type TalentNode = {
 	id: number;
 	name: string;
@@ -8,6 +16,8 @@ export type TalentNode = {
 	maxRank: number;
 	row: number;
 	col: number;
+	type: string;
+	choices: TalentChoice[];
 };
 
 export type TalentTreeView = {

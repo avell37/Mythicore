@@ -65,6 +65,14 @@ export type EquippedItem = {
 	} | null;
 };
 
+export type TalentChoice = {
+	name: string;
+	spellId?: number;
+	description?: string;
+	icon: string | null;
+	selected: boolean;
+};
+
 export type TalentNode = {
 	id: number;
 	name: string;
@@ -75,6 +83,8 @@ export type TalentNode = {
 	maxRank: number;
 	row: number;
 	col: number;
+	type: string;
+	choices: TalentChoice[];
 };
 
 export type TalentTreeView = {
@@ -97,4 +107,49 @@ export type CharacterBuild = {
 	classTree: TalentTreeView;
 	specTree: TalentTreeView;
 	heroTrees: TalentTreeView[];
+};
+
+export type PveRank = {
+	world: number;
+	region: number;
+	realm: number;
+};
+
+export type PveKeyRun = {
+	dungeon: string;
+	shortName: string;
+	level: number;
+	score: number;
+	upgrades: number;
+	clearTimeMs: number;
+	parTimeMs: number;
+	completedAt: string | null;
+	url: string | null;
+};
+
+export type PveRaid = {
+	slug: string;
+	summary: string;
+	totalBosses: number;
+	normal: number;
+	heroic: number;
+	mythic: number;
+};
+
+export type CharacterPve = {
+	profileUrl: string | null;
+	lastCrawledAt: string | null;
+	mythicPlus: {
+		season: string | null;
+		score: number;
+		scoreColor: string;
+		ranks: {
+			overall: PveRank | null;
+			class: PveRank | null;
+		};
+		bestRuns: PveKeyRun[];
+		recentRuns: PveKeyRun[];
+		weeklyRuns: PveKeyRun[];
+	};
+	raids: PveRaid[];
 };
