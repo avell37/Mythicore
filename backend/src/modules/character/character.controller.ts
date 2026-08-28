@@ -31,6 +31,14 @@ export class CharacterController {
 	) {
 		return this.characterService.getCharacterTalents(region, realm, name);
 	}
+	@Get(':region/:realm/:name/mythic')
+	async getCharacterMythicStats(
+		@Param('region') region: string,
+		@Param('realm') realm: string,
+		@Param('name') name: string,
+	) {
+		return this.characterService.getCharacterMythicStats(region, realm, name);
+	}
 
 	@Get(':region/:realm/:name')
 	async getCharacterSummary(

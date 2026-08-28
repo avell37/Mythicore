@@ -68,7 +68,12 @@ export const TalentBuild = ({ build, accent, wowClass }: TalentBuildProps) => {
 					/>
 
 					{activeHero ? (
-						<TalentTreePanel tree={activeHero} accent={accent ?? ''} centerRows />
+						<TalentTreePanel
+							tree={activeHero}
+							accent={accent ?? ''}
+							centerRows
+							pickedOnly
+						/>
 					) : (
 						<div className="w-40 shrink-0" />
 					)}

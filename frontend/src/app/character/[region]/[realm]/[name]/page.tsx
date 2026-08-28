@@ -1,4 +1,5 @@
 import { CharacterView } from '@/widgets/character-view';
+import { formatNameFromParam } from '@/entities/character/lib/format';
 import type { Metadata } from 'next';
 
 export const generateMetadata = async ({
@@ -13,7 +14,7 @@ export const generateMetadata = async ({
 	}
 
 	return {
-		title: `${name} · Mythicore`,
+		title: `${formatNameFromParam(name)} · Mythicore`,
 	};
 };
 

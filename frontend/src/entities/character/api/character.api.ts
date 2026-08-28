@@ -7,6 +7,7 @@ import type {
 	CharacterProps,
 } from '../model/Character';
 import type { CharacterBuild } from '../model/CharacterTalents';
+import { CharacterPve } from '../model/CharacterMythic';
 
 export const getCharacterApi = async ({
 	region,
@@ -44,6 +45,17 @@ export const getCharacterTalentsApi = async ({
 }: CharacterProps): Promise<CharacterBuild> => {
 	const { data } = await baseAxios.get(
 		`${API_URL.character()}/${region}/${realm}/${name}/specializations`,
+	);
+	return data;
+};
+
+export const getCharacterMythicApi = async ({
+	region,
+	realm,
+	name,
+}: CharacterProps): Promise<CharacterPve> => {
+	const { data } = await baseAxios.get(
+		`${API_URL.character()}/${region}/${realm}/${name}/mythic`,
 	);
 	return data;
 };

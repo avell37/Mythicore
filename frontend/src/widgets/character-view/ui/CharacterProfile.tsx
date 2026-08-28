@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { getFactionAccent } from '@/entities/character/lib/format';
 import { getWowClassByName } from '@/shared/lib/wow-classes';
-import { cn } from '@/shared/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { getCharacterStats } from '../lib/getCharacterStats';
 import { CharacterHero } from './CharacterHero';
 import { CharacterStats } from './CharacterStats';
@@ -14,8 +13,8 @@ import { CharacterProfileProps } from '../model/CharacterView';
 import { CharacterDoll } from '@/widgets/character-doll/ui/CharacterDoll';
 import { TalentBuild } from '@/widgets/talent-build/ui/TalentBuild';
 import { TalentBuildSkeleton } from '@/widgets/talent-build/ui/TalentBuildSkeleton';
-
-type ProfileTab = 'overview' | 'talents';
+import { CharacterPvePanel } from '@/widgets/character-pve/ui/CharacterPvePanel';
+import { CharacterPveSkeleton } from '@/widgets/character-pve/ui/CharacterPveSkeleton';
 
 export const CharacterProfile = ({
 	character,
@@ -26,8 +25,10 @@ export const CharacterProfile = ({
 	build,
 	isBuildPending,
 	isBuildError,
+	pve,
+	isPvePending,
+	isPveError,
 }: CharacterProfileProps) => {
-	const [tab, setTab] = useState<ProfileTab>('overview');
 	const wowClass = getWowClassByName(character.character_class.name);
 	const accent = wowClass?.color ?? getFactionAccent(character.faction?.type);
 	const stats = getCharacterStats(character);
@@ -56,50 +57,42 @@ export const CharacterProfile = ({
 					media={media}
 				/>
 
-				<div className="flex w-fit gap-1 rounded-lg border border-border bg-panel/55 p-1">
-					{(
-						[
-							['overview', 'Overview'],
-							['talents', 'Talents'],
-						] as const
-					).map(([id, label]) => (
-						<button
-							key={id}
-							type="button"
-							onClick={() => setTab(id)}
-							className={cn(
-								'rounded-md px-3 py-1.5 text-sm transition-colors',
-								tab === id
-									? 'text-foreground'
-									: 'text-muted-foreground hover:text-foreground',
-							)}
-							style={
-								tab === id
-									? {
-											backgroundColor: `color-mix(in oklab, ${accent} 22%, transparent)`,
-										}
-									: undefined
-							}
-						>
-							{label}
-						</button>
-					))}
-				</div>
+				<Tabs defaultValue="overview" className="gap-4">
+					<TabsList>
+						<TabsTrigger value="overview">Overview</TabsTrigger>
+						<TabsTrigger value="talents">Talents</TabsTrigger>
+						<TabsTrigger value="pve">PvE</TabsTrigger>
+					</TabsList>
 
-				{tab === 'overview' ? (
-					<>
+					<TabsContent value="overview" className="space-y-4">
 						<CharacterDoll media={media} equip={equip} />
 						<CharacterStats stats={stats} accent={accent} motionReady={motionReady} />
-					</>
-				) : isBuildPending ? (
-					<TalentBuildSkeleton />
-				) : isBuildError || !build ? (
-					<p className="rounded-xl border border-border bg-panel/55 p-4 text-sm text-muted-foreground">
-						Talent loadout is unavailable. The character may need to log out in-game.
-					</p>
-				) : (
-					<TalentBuild build={build} accent={accent} wowClass={wowClass} />
-				)}
+					</TabsContent>
+
+					<TabsContent value="talents">
+						{isBuildPending ? (
+							<TalentBuildSkeleton />
+						) : isBuildError || !build ? (
+							<p className="rounded-xl border border-border bg-panel/55 p-4 text-sm text-muted-foreground">
+								Talent loadout is unavailable. The character may need to log out in-game.
+							</p>
+						) : (
+							<TalentBuild build={build} accent={accent} wowClass={wowClass} />
+						)}
+					</TabsContent>
+
+					<TabsContent value="pve">
+						{isPvePending ? (
+							<CharacterPveSkeleton />
+						) : isPveError || !pve ? (
+							<p className="rounded-xl border border-border bg-panel/55 p-4 text-sm text-muted-foreground">
+								PvE data is unavailable. The character may not be indexed on Raider.IO yet.
+							</p>
+						) : (
+							<CharacterPvePanel pve={pve} accent={accent} />
+						)}
+					</TabsContent>
+				</Tabs>
 			</motion.div>
 		</div>
 	);

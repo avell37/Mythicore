@@ -3,6 +3,9 @@ import { TalentNode } from '@/entities/character/model/CharacterTalents';
 export const isRenderableTalent = (node: TalentNode) =>
 	Boolean(node.name?.trim()) && node.name !== 'Unknown talent';
 
+export const isVisibleTalent = (node: TalentNode, pickedOnly: boolean) =>
+	isRenderableTalent(node) && (!pickedOnly || node.rank > 0);
+
 export const uniqueTalents = (nodes: TalentNode[]) => {
 	const byId = new Map<number, TalentNode>();
 
@@ -14,8 +17,8 @@ export const uniqueTalents = (nodes: TalentNode[]) => {
 	return [...byId.values()];
 };
 
-export const getTreeLayout = (nodes: TalentNode[]) => {
-	const visible = uniqueTalents(nodes.filter(isRenderableTalent));
+export const getTreeLayout = (nodes: TalentNode[], pickedOnly = false) => {
+	const visible = uniqueTalents(nodes.filter((node) => isVisibleTalent(node, pickedOnly)));
 
 	if (visible.length === 0) {
 		return {
@@ -41,8 +44,8 @@ export const getTreeLayout = (nodes: TalentNode[]) => {
 	};
 };
 
-export const getCenteredRows = (nodes: TalentNode[]) => {
-	const visible = uniqueTalents(nodes.filter(isRenderableTalent));
+export const getCenteredRows = (nodes: TalentNode[], pickedOnly = false) => {
+	const visible = uniqueTalents(nodes.filter((node) => isVisibleTalent(node, pickedOnly)));
 	const rows = [...new Set(visible.map((node) => node.row))].sort((a, b) => a - b);
 
 	return rows.map((row) =>

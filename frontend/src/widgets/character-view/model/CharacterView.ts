@@ -1,4 +1,5 @@
 import { CharacterBuild } from '@/entities/character/model/CharacterTalents';
+import { CharacterPve } from '@/entities/character/model/CharacterMythic';
 import {
 	Character,
 	CharacterEquipment,
@@ -40,6 +41,9 @@ export type CharacterProfileProps = {
 	build?: CharacterBuild;
 	isBuildPending?: boolean;
 	isBuildError?: boolean;
+	pve?: CharacterPve;
+	isPvePending?: boolean;
+	isPveError?: boolean;
 };
 
 export type CharacterStatsProps = {

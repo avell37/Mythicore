@@ -24,4 +24,13 @@ export const characterKeys = {
 		realm: string;
 		name: string;
 	}) => [...characterBase, 'talents', region, realm, name] as const,
+	getCharacterMythic: ({
+		region,
+		realm,
+		name,
+	}: {
+		region: string;
+		realm: string;
+		name: string;
+	}) => [...characterBase, 'mythic', region, realm, name] as const,
 };
