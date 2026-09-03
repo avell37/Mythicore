@@ -2,8 +2,7 @@ import type { CharacterProps } from '../model/Character';
 
 export const characterBase = ['character'] as const;
 
-const lookupKey = ({ region, realm, name }: CharacterProps) =>
-	[region, realm, name] as const;
+const lookupKey = ({ region, realm, name }: CharacterProps) => [region, realm, name] as const;
 
 export const characterKeys = {
 	all: characterBase,
@@ -18,4 +17,6 @@ export const characterKeys = {
 		[...characterBase, 'pve', ...lookupKey(lookup)] as const,
 	getCharacterTitles: (lookup: CharacterProps) =>
 		[...characterBase, 'titles', ...lookupKey(lookup)] as const,
+	getCharacterReputations: (lookup: CharacterProps) =>
+		[...characterBase, 'reputations', ...lookupKey(lookup)] as const,
 };

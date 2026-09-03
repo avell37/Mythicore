@@ -185,3 +185,28 @@ export type BlizzardTitlesResponse = {
 	active_title?: BlizzardTitle;
 	titles?: BlizzardTitle[];
 };
+
+export type BlizzardReputationParagon = {
+	max?: number;
+	raw?: number;
+	value?: number;
+};
+
+export type BlizzardReputationStanding = {
+	max?: number;
+	name?: string;
+	raw?: number;
+	renown_level?: number;
+	tier?: number;
+	value?: number;
+};
+
+export type BlizzardReputation = {
+	faction?: BlizzardNamedId;
+	standing?: BlizzardReputationStanding;
+	paragon?: BlizzardReputationParagon;
+};
+
+export type BlizzardReputationsResponse = {
+	reputations?: BlizzardReputation[];
+};

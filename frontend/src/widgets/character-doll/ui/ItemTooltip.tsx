@@ -1,8 +1,4 @@
-import type {
-	EquippedItem,
-	ItemEnchantment,
-	ItemSocket,
-} from '@/entities/character';
+import type { EquippedItem, ItemEnchantment, ItemSocket } from '@/entities/character';
 import { ENCHANT_GREEN } from '@/shared/lib/enchant';
 import { TinyIcon } from '@/shared/ui/tiny-icon';
 
@@ -127,7 +123,7 @@ export const ItemTooltip = ({ item }: { item: EquippedItem }) => {
 							className="text-sm"
 							style={{ color: ef.active ? ENCHANT_GREEN : '#808080' }}
 						>
-							({ef.required}) {ef.text}
+							{ef.text}
 						</p>
 					))}
 				</div>

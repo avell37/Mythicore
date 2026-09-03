@@ -5,18 +5,19 @@ import type { CharacterMedia } from '../model/CharacterMedia';
 import type { CharacterPve } from '../model/CharacterPve';
 import type { CharacterBuild } from '../model/CharacterTalents';
 import type { CharacterTitles } from '../model/CharacterTitles';
+import type { CharacterReputations } from '../model/CharacterReputations';
 import {
 	getCharacterApi,
 	getCharacterEquipmentApi,
 	getCharacterMediaApi,
 	getCharacterPveApi,
+	getCharacterReputationsApi,
 	getCharacterTalentsApi,
 	getCharacterTitlesApi,
 } from '../api/character.api';
 import { characterKeys } from '../api/query-keys';
 
-const isLookupReady = ({ region, realm, name }: CharacterProps) =>
-	Boolean(region && realm && name);
+const isLookupReady = ({ region, realm, name }: CharacterProps) => Boolean(region && realm && name);
 
 const createCharacterQuery = <T>(
 	getKey: (lookup: CharacterProps) => readonly unknown[],
@@ -58,4 +59,9 @@ export const useGetCharacterPveQuery = createCharacterQuery<CharacterPve>(
 export const useGetCharacterTitlesQuery = createCharacterQuery<CharacterTitles>(
 	characterKeys.getCharacterTitles,
 	getCharacterTitlesApi,
+);
+
+export const useGetCharacterReputationsQuery = createCharacterQuery<CharacterReputations>(
+	characterKeys.getCharacterReputations,
+	getCharacterReputationsApi,
 );

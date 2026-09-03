@@ -1,4 +1,4 @@
-export const CHARACTER_TABS = ['overview', 'talents', 'pve', 'titles'] as const;
+export const CHARACTER_TABS = ['overview', 'talents', 'pve', 'titles', 'reputations'] as const;
 
 export type CharacterTab = (typeof CHARACTER_TABS)[number];
 
