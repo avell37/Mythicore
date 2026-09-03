@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import { PreviewCard } from '@base-ui/react/preview-card';
-import type { EquippedItem } from '@/entities/character/model/Character';
-import type { GearSlotDef } from '@/widgets/character-doll/lib/gear-slots';
+import type { EquippedItem } from '@/entities/character';
+import type { GearSlotDef } from '../lib/gear-slots';
 import { cn } from '@/shared/lib/utils';
 import { ItemTooltip } from './ItemTooltip';
 
@@ -42,7 +42,7 @@ const SlotContent = ({
 				{item?.icon ? (
 					<Image
 						src={item.icon}
-						alt=""
+						alt={item.name}
 						width={48}
 						height={48}
 						className="size-full object-cover"
@@ -101,7 +101,17 @@ export const GearSlot = ({ slot, item, side, variant = 'doll' }: GearSlotProps) 
 
 	return (
 		<PreviewCard.Root>
-			<PreviewCard.Trigger delay={80} closeDelay={60} render={<div className={rowClass} />}>
+			<PreviewCard.Trigger
+				delay={80}
+				closeDelay={60}
+				render={
+					<button
+						type="button"
+						className={cn(rowClass, 'border-0 bg-transparent p-0 text-left')}
+						aria-label={`${item.name}, ${slot.label}`}
+					/>
+				}
+			>
 				<SlotContent slot={slot} item={item} side={side} variant={variant} />
 			</PreviewCard.Trigger>
 

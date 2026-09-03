@@ -20,15 +20,11 @@ export const useCharacterLookup = () => {
 		router.push(`/character/${region}/${trimmedRealm}/${trimmedName}`);
 	};
 
-	const fieldClass =
-		'h-11 w-full rounded-md border border-input bg-panel/80 px-3 text-sm text-foreground outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground/70 focus:border-primary/60 focus:shadow-[0_0_0_3px_var(--violet-glow)]';
-
 	return {
 		region,
 		realm,
 		name,
 		motionReady,
-		fieldClass,
 		setRegion,
 		setRealm,
 		setName,

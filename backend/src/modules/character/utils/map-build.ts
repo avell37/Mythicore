@@ -1,7 +1,28 @@
+import type {
+	BlizzardHeroListing,
+	BlizzardLoadout,
+	BlizzardLoadoutTalent,
+	BlizzardTalentNode,
+	BlizzardTalentTooltip,
+	BlizzardTalentTree,
+} from '../../blizzard/types/blizzard.types';
 import { CharacterBuild, TalentNode } from '../types/character.types';
 import { stripWowMarkup } from './character-utils';
 
-const heroIdOf = (hero) => parseTalentTreeHref(hero.key?.href)?.heroTreeId ?? hero.id;
+export const HERO_NODE_MIN = 6;
+export const HERO_NODE_MAX = 40;
+
+export type TalentPicks = {
+	specId: number;
+	specName: string;
+	loadout: BlizzardLoadout | null;
+	treeId: number | null;
+	heroTreeId: number | null;
+	heroName: string | null;
+};
+
+const heroIdOf = (hero: BlizzardHeroListing) =>
+	parseTalentTreeHref(hero.key?.href)?.heroTreeId ?? hero.id;
 
 export const parseTalentTreeHref = (href?: string) => {
 	if (!href) return null;
@@ -19,7 +40,7 @@ export const parseTalentTreeHref = (href?: string) => {
 	return null;
 };
 
-export const tooltipOf = (node, picked) => {
+export const tooltipOf = (node: BlizzardTalentNode, picked?: BlizzardLoadoutTalent) => {
 	if (picked?.tooltip) return picked.tooltip;
 
 	for (const rank of node.ranks ?? []) {
@@ -30,25 +51,25 @@ export const tooltipOf = (node, picked) => {
 	return node.tooltip ?? null;
 };
 
-const isHeroSized = (nodes) => Array.isArray(nodes) && nodes.length >= 6 && nodes.length <= 40;
+const isHeroSized = (nodes: unknown): nodes is BlizzardTalentNode[] =>
+	Array.isArray(nodes) && nodes.length >= HERO_NODE_MIN && nodes.length <= HERO_NODE_MAX;
 
-export const nodesOfHero = (hero) => {
+export const nodesOfHero = (hero?: BlizzardHeroListing | null): BlizzardTalentNode[] => {
 	if (!hero) return [];
 
 	const named = hero.hero_talent_nodes;
-	if (isHeroSized(named)) return named;
+	if (Array.isArray(named) && named.length) return named;
 
 	for (const nodes of [hero.talent_nodes, hero.spec_talent_nodes, hero.class_talent_nodes]) {
 		if (isHeroSized(nodes)) return nodes;
 	}
 
-	if (Array.isArray(named) && named.length) return named;
 	if (Array.isArray(hero.talent_nodes) && hero.talent_nodes.length) return hero.talent_nodes;
 
 	return [];
 };
 
-const talentIdsOf = (node): number[] => {
+const talentIdsOf = (node: BlizzardTalentNode): number[] => {
 	const ids: number[] = [];
 
 	for (const rank of node.ranks ?? []) {
@@ -61,13 +82,13 @@ const talentIdsOf = (node): number[] => {
 	return ids;
 };
 
-const tipMeta = (tip) => ({
+const tipMeta = (tip?: BlizzardTalentTooltip | null) => ({
 	name: tip?.talent?.name ?? tip?.spell_tooltip?.spell?.name ?? '',
-	spellId: tip?.spell_tooltip?.spell?.id as number | undefined,
+	spellId: tip?.spell_tooltip?.spell?.id,
 	description: stripWowMarkup(tip?.spell_tooltip?.description ?? ''),
 });
 
-const choiceTipsOf = (node) => {
+const choiceTipsOf = (node: BlizzardTalentNode) => {
 	for (const rank of node.ranks ?? []) {
 		if (Array.isArray(rank.choice_of_tooltips) && rank.choice_of_tooltips.length > 1) {
 			return rank.choice_of_tooltips;
@@ -76,7 +97,10 @@ const choiceTipsOf = (node) => {
 	return [];
 };
 
-export const mapNode = (node, rankById): TalentNode => {
+export const mapNode = (
+	node: BlizzardTalentNode,
+	rankById: Map<number, BlizzardLoadoutTalent>,
+): TalentNode => {
 	let picked = rankById.get(node.id);
 	if (!picked) {
 		for (const talentId of talentIdsOf(node)) {
@@ -86,8 +110,7 @@ export const mapNode = (node, rankById): TalentNode => {
 	}
 
 	const choiceTips = choiceTipsOf(node);
-	const isChoice =
-		node.node_type?.type === 'CHOICE' || choiceTips.length > 1;
+	const isChoice = node.node_type?.type === 'CHOICE' || choiceTips.length > 1;
 	const tip = tooltipOf(node, picked);
 	const selected = tipMeta(tip);
 
@@ -108,9 +131,9 @@ export const mapNode = (node, rankById): TalentNode => {
 			})
 		: [];
 
-	if (choices.length && picked && !choices.some((c) => c.selected)) {
+	if (choices.length && picked && !choices.some((choice) => choice.selected)) {
 		const byName = choices.find(
-			(c) => c.name && selected.name && c.name === selected.name,
+			(choice) => choice.name && selected.name && choice.name === selected.name,
 		);
 		if (byName) byName.selected = true;
 	}
@@ -132,17 +155,21 @@ export const mapNode = (node, rankById): TalentNode => {
 	};
 };
 
-export const ranksFrom = (talents) => {
-	const map = new Map<number, any>();
-	for (const tal of talents ?? []) {
-		map.set(tal.id, tal);
-		const talentId = tal.tooltip?.talent?.id;
-		if (typeof talentId === 'number') map.set(talentId, tal);
+export const ranksFrom = (talents?: BlizzardLoadoutTalent[]) => {
+	const map = new Map<number, BlizzardLoadoutTalent>();
+	for (const talent of talents ?? []) {
+		map.set(talent.id, talent);
+		const talentId = talent.tooltip?.talent?.id;
+		if (typeof talentId === 'number') map.set(talentId, talent);
 	}
 	return map;
 };
 
-export const mapBuild = (picks, tree, heroTrees): CharacterBuild => {
+export const mapBuild = (
+	picks: TalentPicks,
+	tree: BlizzardTalentTree | null,
+	heroTrees: BlizzardHeroListing[],
+): CharacterBuild => {
 	const loadout = picks.loadout;
 	const classRanks = ranksFrom(loadout?.selected_class_talents);
 	const specRanks = ranksFrom(loadout?.selected_spec_talents);
@@ -152,10 +179,11 @@ export const mapBuild = (picks, tree, heroTrees): CharacterBuild => {
 	const heroNodeIds = new Set(
 		heroTrees.flatMap((hero) => nodesOfHero(hero).map((node) => node.id)),
 	);
-	const withoutHeroNodes = (nodes) => (nodes ?? []).filter((node) => !heroNodeIds.has(node.id));
+	const withoutHeroNodes = (nodes?: BlizzardTalentNode[]) =>
+		(nodes ?? []).filter((node) => !heroNodeIds.has(node.id));
 
 	const heroName = (picks.heroName ?? '').toLowerCase();
-	const isActiveHero = (hero) => {
+	const isActiveHero = (hero: BlizzardHeroListing) => {
 		const id = heroIdOf(hero);
 		if (activeHeroId && id === activeHeroId) return true;
 		if (heroName && hero.name?.toLowerCase() === heroName) return true;
@@ -171,31 +199,35 @@ export const mapBuild = (picks, tree, heroTrees): CharacterBuild => {
 		heroTree:
 			activeHeroId || picks.heroName
 				? {
-						id: activeHeroId,
+						id: activeHeroId ?? 0,
 						name: activeHero?.name ?? picks.heroName ?? '',
 					}
 				: null,
 		loadoutCode: loadout?.talent_loadout_code ?? null,
 		classTree: {
-			id: tree?.id,
+			id: tree?.id ?? 0,
 			name: tree?.playable_class?.name ?? 'Class',
 			active: true,
-			nodes: withoutHeroNodes(tree?.class_talent_nodes).map((n) => mapNode(n, classRanks)),
+			nodes: withoutHeroNodes(tree?.class_talent_nodes).map((node) =>
+				mapNode(node, classRanks),
+			),
 		},
 		specTree: {
-			id: picks?.specId,
+			id: picks.specId,
 			name: tree?.playable_specialization?.name ?? picks.specName,
 			active: true,
-			nodes: withoutHeroNodes(tree?.spec_talent_nodes).map((n) => mapNode(n, specRanks)),
+			nodes: withoutHeroNodes(tree?.spec_talent_nodes).map((node) =>
+				mapNode(node, specRanks),
+			),
 		},
 		heroTrees: heroTrees.map((hero) => {
 			const id = heroIdOf(hero);
 
 			return {
-				id,
-				name: hero.name,
+				id: id ?? 0,
+				name: hero.name ?? '',
 				active: isActiveHero(hero),
-				nodes: nodesOfHero(hero).map((n) => mapNode(n, heroRanks)),
+				nodes: nodesOfHero(hero).map((node) => mapNode(node, heroRanks)),
 			};
 		}),
 	};

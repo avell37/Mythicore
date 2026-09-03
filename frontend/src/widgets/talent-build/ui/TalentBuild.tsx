@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { Check, Copy, ArrowRightLeft } from 'lucide-react';
+import { accentPanelGradient, accentWash } from '@/shared/lib/accent';
 import { TalentTreePanel } from './TalentTreePanel';
 import { TalentBuildProps } from '../model/TalentBuild';
-import { useTalendBuild } from '../hooks/useTalendBuild';
+import { useTalentBuild } from '../hooks/useTalentBuild';
 
 export const TalentBuild = ({ build, accent, wowClass }: TalentBuildProps) => {
-	const { activeHero, copyLoadout, copied, metaHref, spec } = useTalendBuild({ build, wowClass });
+	const { activeHero, copyLoadout, copied, metaHref, spec } = useTalentBuild({ build, wowClass });
 
 	return (
 		<div className="space-y-4">
@@ -48,12 +49,12 @@ export const TalentBuild = ({ build, accent, wowClass }: TalentBuildProps) => {
 			</div>
 
 			<section
-				className="overflow-x-auto rounded-xl border border-border bg-panel/55 p-4"
+				className="overflow-x-auto overflow-y-hidden rounded-xl border border-border bg-panel/55 p-4"
 				style={{
-					backgroundImage: `linear-gradient(180deg, color-mix(in oklab, ${accent} 8%, transparent), transparent 42%)`,
+					backgroundImage: accentPanelGradient(accent ?? '', 180, 8, 42),
 				}}
 			>
-				<div className="flex min-w-max items-start justify-center gap-10">
+				<div className="flex min-w-max items-start justify-center gap-6">
 					<TalentTreePanel
 						tree={build.classTree}
 						accent={accent ?? ''}

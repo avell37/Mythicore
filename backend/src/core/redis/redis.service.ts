@@ -48,6 +48,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 			return JSON.parse(raw) as T;
 		} catch {
 			this.logger.warn(`Failed to parse JSON cache for key: ${key}`);
+			await this.del(key);
 			return null;
 		}
 	}

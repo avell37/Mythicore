@@ -1,51 +1,40 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CharacterService } from './character.service';
+import { CharacterLookupDto } from './dto/character-lookup.dto';
 
+@Throttle({ default: { limit: 30, ttl: 60_000 } })
 @Controller('character')
 export class CharacterController {
 	constructor(private readonly characterService: CharacterService) {}
 
 	@Get(':region/:realm/:name/media')
-	async getCharacterMedia(
-		@Param('region') region: string,
-		@Param('realm') realm: string,
-		@Param('name') name: string,
-	) {
-		return this.characterService.getCharacterMedia(region, realm, name);
+	getCharacterMedia(@Param() params: CharacterLookupDto) {
+		return this.characterService.getCharacterMedia(params.region, params.realm, params.name);
 	}
 
 	@Get(':region/:realm/:name/equipment')
-	async getCharacterEquipment(
-		@Param('region') region: string,
-		@Param('realm') realm: string,
-		@Param('name') name: string,
-	) {
-		return this.characterService.getCharacterEquipment(region, realm, name);
+	getCharacterEquipment(@Param() params: CharacterLookupDto) {
+		return this.characterService.getCharacterEquipment(params.region, params.realm, params.name);
 	}
 
-	@Get(':region/:realm/:name/specializations')
-	async getCharacterTalents(
-		@Param('region') region: string,
-		@Param('realm') realm: string,
-		@Param('name') name: string,
-	) {
-		return this.characterService.getCharacterTalents(region, realm, name);
+	@Get(':region/:realm/:name/talents')
+	getCharacterTalents(@Param() params: CharacterLookupDto) {
+		return this.characterService.getCharacterTalents(params.region, params.realm, params.name);
 	}
-	@Get(':region/:realm/:name/mythic')
-	async getCharacterMythicStats(
-		@Param('region') region: string,
-		@Param('realm') realm: string,
-		@Param('name') name: string,
-	) {
-		return this.characterService.getCharacterMythicStats(region, realm, name);
+
+	@Get(':region/:realm/:name/pve')
+	getCharacterPve(@Param() params: CharacterLookupDto) {
+		return this.characterService.getCharacterPve(params.region, params.realm, params.name);
+	}
+
+	@Get(':region/:realm/:name/titles')
+	getCharacterTitles(@Param() params: CharacterLookupDto) {
+		return this.characterService.getCharacterTitles(params.region, params.realm, params.name);
 	}
 
 	@Get(':region/:realm/:name')
-	async getCharacterSummary(
-		@Param('region') region: string,
-		@Param('realm') realm: string,
-		@Param('name') name: string,
-	) {
-		return this.characterService.getCharacterSummary(region, realm, name);
+	getCharacterSummary(@Param() params: CharacterLookupDto) {
+		return this.characterService.getCharacterSummary(params.region, params.realm, params.name);
 	}
 }

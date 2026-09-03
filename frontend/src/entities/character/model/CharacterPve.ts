@@ -13,7 +13,6 @@ export type PveKeyRun = {
 	clearTimeMs: number;
 	parTimeMs: number;
 	completedAt: string | null;
-	url: string | null;
 };
 
 export type PveRaid = {
@@ -38,7 +37,6 @@ export type CharacterPve = {
 		};
 		bestRuns: PveKeyRun[];
 		recentRuns: PveKeyRun[];
-		weeklyRuns: PveKeyRun[];
 	};
 	raids: PveRaid[];
 };

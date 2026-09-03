@@ -1,5 +1,3 @@
-import type { Character } from '../model/Character';
-
 export const formatLastLogin = (timestamp: number): string => {
 	if (!timestamp) return 'Unknown';
 
@@ -21,14 +19,3 @@ export const formatNameFromParam = (name: string): string => {
 	if (!decoded) return decoded;
 	return decoded.charAt(0).toUpperCase() + decoded.slice(1);
 };
-
-export const buildCharacterDocumentTitle = (character: Character): string =>
-	[
-		character.name,
-		character.active_spec?.name,
-		character.character_class?.name,
-		character.equipped_item_level ? `${character.equipped_item_level} ilvl` : null,
-		'Mythicore',
-	]
-		.filter(Boolean)
-		.join(' · ');

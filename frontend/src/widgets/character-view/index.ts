@@ -1,1 +1,3 @@
-export { CharacterView } from './ui/CharacterView';
+export { CharacterHero } from './ui/CharacterHero';
+export { CharacterStats } from './ui/CharacterStats';
+export { getCharacterStats } from './lib/getCharacterStats';

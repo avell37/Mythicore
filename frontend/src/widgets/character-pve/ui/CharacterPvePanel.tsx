@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
-import type { CharacterPve } from '@/entities/character/model/CharacterMythic';
+import { formatRank, type CharacterPve } from '@/entities/character';
+import { accentPanelGradient } from '@/shared/lib/accent';
 import { cn } from '@/shared/lib/utils';
-import { formatRank } from '../utils/character-pve.utils';
 import { CharacterRaidCard } from './CharacterRaidCard';
 import { CharacterRunRow } from './CharacterRunRow';
 
@@ -24,7 +24,7 @@ export const CharacterPvePanel = ({ pve, accent }: CharacterPvePanelProps) => {
 			<section
 				className="rounded-xl border border-border bg-panel/55 p-4 sm:p-5"
 				style={{
-					backgroundImage: `linear-gradient(180deg, color-mix(in oklab, ${accent} 8%, transparent), transparent 50%)`,
+					backgroundImage: accentPanelGradient(accent),
 				}}
 			>
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

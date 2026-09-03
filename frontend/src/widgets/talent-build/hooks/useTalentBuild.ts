@@ -2,7 +2,7 @@ import { toast } from 'sonner';
 import { TalentBuildProps } from '../model/TalentBuild';
 import { useState } from 'react';
 
-export const useTalendBuild = ({ build, wowClass }: TalentBuildProps) => {
+export const useTalentBuild = ({ build, wowClass }: TalentBuildProps) => {
 	const [copied, setCopied] = useState(false);
 	const spec = wowClass?.specs.find(
 		(item) => item.name.toLowerCase() === build.spec.name.toLowerCase(),

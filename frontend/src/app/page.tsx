@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useMotionReady } from '@/shared/lib/use-motion-ready';
-import { CharacterLookup } from '@/widgets/character-lookup/ui/CharacterLookup';
+import { CharacterLookup } from '@/features/character-lookup';
 
 export default function HomePage() {
 	const motionReady = useMotionReady();

@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import type { TalentTreeView } from '@/entities/character/model/CharacterTalents';
+import type { TalentTreeView } from '@/entities/character';
 import { getCenteredRows, getTreeLayout } from '../utils/talent-tree.utils';
-import { TalentNodeIcon } from '@/shared/ui/talent';
+import { TalentNodeIcon } from './Talent';
 
 export const TalentTreePanel = ({
 	tree,
@@ -28,7 +28,14 @@ export const TalentTreePanel = ({
 		<div className="min-w-0">
 			<div className="mb-3 flex items-center justify-center gap-2">
 				{icon ? (
-					<Image src={icon} alt="" width={18} height={18} className="size-4 rounded-sm" />
+					<Image
+						src={icon}
+						alt=""
+						aria-hidden
+						width={18}
+						height={18}
+						className="size-4 rounded-sm"
+					/>
 				) : null}
 				<p className="text-sm font-medium">{tree.name}</p>
 			</div>
@@ -45,25 +52,25 @@ export const TalentTreePanel = ({
 						</div>
 					))}
 				</div>
-			) : (
-				<div className="overflow-x-auto">
-					<div
-						className="grid w-max gap-2"
-						style={{
-							gridTemplateColumns: `repeat(${layout!.cols}, 2.25rem)`,
-							gridTemplateRows: `repeat(${layout!.rows}, 2.25rem)`,
-						}}
-					>
-						{layout!.items.map((node) => (
-							<div
-								key={node.id}
-								style={{ gridColumn: node.gridCol, gridRow: node.gridRow }}
-							>
-								<TalentNodeIcon node={node} accent={accent} />
-							</div>
-						))}
-					</div>
+			) : layout ? (
+				<div
+					className="grid w-max gap-2"
+					style={{
+						gridTemplateColumns: `repeat(${layout.cols}, 2.25rem)`,
+						gridTemplateRows: `repeat(${layout.rows}, 2.25rem)`,
+					}}
+				>
+					{layout.items.map((node) => (
+						<div
+							key={node.id}
+							style={{ gridColumn: node.gridCol, gridRow: node.gridRow }}
+						>
+							<TalentNodeIcon node={node} accent={accent} />
+						</div>
+					))}
 				</div>
+			) : (
+				<p className="text-sm text-muted-foreground">No talents</p>
 			)}
 		</div>
 	);

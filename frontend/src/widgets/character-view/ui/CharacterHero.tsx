@@ -2,8 +2,16 @@
 
 import Image from 'next/image';
 import { Crosshair } from 'lucide-react';
-import { getFactionAccent } from '@/entities/character/lib/format';
-import { CharacterHeroProps } from '../model/CharacterView';
+import { getFactionAccent, type Character, type CharacterMedia } from '@/entities/character';
+import type { WowClass } from '@/shared/lib/wow-classes';
+
+export type CharacterHeroProps = {
+	character: Character;
+	region: string;
+	accent: string;
+	wowClass?: WowClass;
+	media?: CharacterMedia;
+};
 
 export const CharacterHero = ({
 	character,
@@ -21,7 +29,7 @@ export const CharacterHero = ({
 				{portrait ? (
 					<Image
 						src={portrait}
-						alt=""
+						alt={`${character.name} portrait`}
 						width={224}
 						height={224}
 						quality={92}
@@ -31,7 +39,7 @@ export const CharacterHero = ({
 				) : wowClass ? (
 					<Image
 						src={wowClass.icon}
-						alt=""
+						alt={`${wowClass.name} icon`}
 						width={112}
 						height={112}
 						className="relative size-14 object-contain"

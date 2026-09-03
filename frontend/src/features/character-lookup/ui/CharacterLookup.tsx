@@ -2,13 +2,16 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, Crosshair } from 'lucide-react';
-import { REGIONS } from '@/shared/lib/wow-classes';
+import { FIELD_CLASS } from '@/shared/lib/field-class';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
+import { REGIONS } from '@/shared/lib/wow-classes';
 import { useCharacterLookup } from '../hooks/useCharacterLookup';
 
 export const CharacterLookup = ({ formId = 'character-lookup' }: { formId?: string }) => {
-	const { region, realm, name, motionReady, fieldClass, setRegion, setRealm, setName, onSubmit } =
+	const { region, realm, name, motionReady, setRegion, setRealm, setName, onSubmit } =
 		useCharacterLookup();
+	const fieldClass = cn(FIELD_CLASS, 'h-11 rounded-md px-3');
 
 	return (
 		<motion.form
@@ -27,11 +30,12 @@ export const CharacterLookup = ({ formId = 'character-lookup' }: { formId?: stri
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-[7rem_1fr_1fr]">
-				<label className="block">
+				<label className="block" htmlFor="character-lookup-region">
 					<span className="mb-1.5 block text-xs font-medium text-muted-foreground">
 						Region
 					</span>
 					<select
+						id="character-lookup-region"
 						value={region}
 						onChange={(e) => setRegion(e.target.value)}
 						className={cn(fieldClass, 'appearance-none pr-8')}
@@ -49,11 +53,12 @@ export const CharacterLookup = ({ formId = 'character-lookup' }: { formId?: stri
 					</select>
 				</label>
 
-				<label className="block">
+				<label className="block" htmlFor="character-lookup-realm">
 					<span className="mb-1.5 block text-xs font-medium text-muted-foreground">
 						Realm
 					</span>
 					<input
+						id="character-lookup-realm"
 						value={realm}
 						onChange={(e) => setRealm(e.target.value)}
 						placeholder="Howling Fjord"
@@ -62,11 +67,12 @@ export const CharacterLookup = ({ formId = 'character-lookup' }: { formId?: stri
 					/>
 				</label>
 
-				<label className="block">
+				<label className="block" htmlFor="character-lookup-name">
 					<span className="mb-1.5 block text-xs font-medium text-muted-foreground">
 						Character
 					</span>
 					<input
+						id="character-lookup-name"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 						placeholder="Name"
@@ -76,13 +82,13 @@ export const CharacterLookup = ({ formId = 'character-lookup' }: { formId?: stri
 				</label>
 			</div>
 
-			<button
+			<Button
 				type="submit"
-				className="mt-4 inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground transition-[filter,transform] hover:brightness-110 active:translate-y-px"
+				className="mt-4 h-11 bg-primary px-5 text-primary-foreground"
 			>
 				Look up
 				<ArrowRight className="size-4" />
-			</button>
+			</Button>
 		</motion.form>
 	);
 };

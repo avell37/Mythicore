@@ -1,13 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
+
+const subscribe = () => () => {};
 
 export function useMotionReady() {
-	const [ready, setReady] = useState(false);
-
-	useEffect(() => {
-		setReady(true);
-	}, []);
-
-	return ready;
+	return useSyncExternalStore(subscribe, () => true, () => false);
 }
