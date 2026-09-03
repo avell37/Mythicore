@@ -1,7 +1,5 @@
-'use client';
-
-export const CharacterViewSkeleton = () => (
-	<div className="relative mx-auto w-full max-w-5xl px-5 py-10 sm:px-8 lg:px-12 lg:py-14">
+export const CharacterPageSkeleton = () => (
+	<div className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-10 lg:px-12 lg:py-14">
 		<div className="mb-8 h-4 w-16 animate-pulse rounded bg-muted/60" />
 		<div className="mb-10 flex flex-col gap-6 sm:flex-row">
 			<div className="size-24 animate-pulse rounded-xl bg-muted/50 sm:size-28" />
@@ -12,7 +10,7 @@ export const CharacterViewSkeleton = () => (
 			</div>
 		</div>
 		<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-			{Array.from({ length: 4 }).map((el, index) => (
+			{Array.from({ length: 4 }).map((_, index) => (
 				<div key={index} className="h-24 animate-pulse rounded-xl bg-muted/40" />
 			))}
 		</div>

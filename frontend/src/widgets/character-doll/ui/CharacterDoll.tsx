@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import type { CharacterEquipment, CharacterMedia } from '@/entities/character/model/Character';
+import type { CharacterEquipment, CharacterMedia } from '@/entities/character';
 import { DOLL_ALL, DOLL_BOTTOM, DOLL_LEFT, DOLL_RIGHT } from '../lib/gear-slots';
 import { GearSlot } from './GearSlot';
 
@@ -23,7 +23,7 @@ const Portrait = ({
 		<div className={className}>
 			<Image
 				src={portrait}
-				alt=""
+				alt="Character portrait"
 				fill
 				sizes="(max-width: 768px) 90vw, 560px"
 				quality={95}

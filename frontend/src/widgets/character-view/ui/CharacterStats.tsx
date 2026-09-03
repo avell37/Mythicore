@@ -1,7 +1,20 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CharacterStatsProps } from '../model/CharacterView';
+import type { LucideIcon } from 'lucide-react';
+import { accentPanelGradient } from '@/shared/lib/accent';
+
+export type CharacterStatItem = {
+	label: string;
+	value: string;
+	icon: LucideIcon;
+};
+
+export type CharacterStatsProps = {
+	stats: CharacterStatItem[];
+	accent: string;
+	motionReady: boolean;
+};
 
 export const CharacterStats = ({ stats, accent, motionReady }: CharacterStatsProps) => (
 	<section className="mb-6 grid grid-cols-2 gap-2.5 sm:mb-8 sm:gap-3 lg:grid-cols-4">
@@ -17,7 +30,7 @@ export const CharacterStats = ({ stats, accent, motionReady }: CharacterStatsPro
 				}}
 				className="rounded-xl border border-border bg-panel/55 p-4"
 				style={{
-					backgroundImage: `linear-gradient(160deg, ${accent}0d, transparent 50%)`,
+					backgroundImage: accentPanelGradient(accent, 160, 5, 50),
 				}}
 			>
 				<div className="mb-3 flex items-center gap-2 text-muted-foreground">

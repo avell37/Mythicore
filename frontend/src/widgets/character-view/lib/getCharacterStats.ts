@@ -1,27 +1,32 @@
-import { Award, CalendarDays, Shield, Swords } from 'lucide-react';
-import type { Character } from '@/entities/character/model/Character';
-import { formatLastLogin } from '@/entities/character/lib/format';
-import { CharacterStatItem } from '../model/CharacterView';
+'use client';
 
-export const getCharacterStats = (character: Character): CharacterStatItem[] => [
-	{
-		label: 'Equipped ilvl',
-		value: String(character.equipped_item_level ?? '—'),
-		icon: Swords,
-	},
-	{
-		label: 'Average ilvl',
-		value: String(character.average_item_level ?? '—'),
-		icon: Shield,
-	},
-	{
-		label: 'Achievement points',
-		value: character.achievement_points?.toLocaleString('en-US') ?? '—',
-		icon: Award,
-	},
-	{
-		label: 'Last login',
-		value: formatLastLogin(character.last_login_timestamp),
-		icon: CalendarDays,
-	},
-];
+import { Award, CalendarDays, Shield, Swords } from 'lucide-react';
+import { getCharacterStatValues, type Character } from '@/entities/character';
+import type { CharacterStatItem } from '../ui/CharacterStats';
+
+export const getCharacterStats = (character: Character): CharacterStatItem[] => {
+	const values = getCharacterStatValues(character);
+
+	return [
+		{
+			label: 'Equipped ilvl',
+			value: values.equippedIlvl,
+			icon: Swords,
+		},
+		{
+			label: 'Average ilvl',
+			value: values.averageIlvl,
+			icon: Shield,
+		},
+		{
+			label: 'Achievement points',
+			value: values.achievementPoints,
+			icon: Award,
+		},
+		{
+			label: 'Last login',
+			value: values.lastLogin,
+			icon: CalendarDays,
+		},
+	];
+};

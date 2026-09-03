@@ -1,35 +1,49 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 
-const mapErrorStatus = (status: number): number => {
-	if (status === 404 || status === 403) return HttpStatus.NOT_FOUND;
+const logger = new Logger('Upstream');
+
+type UpstreamSource = 'Blizzard' | 'Raider';
+
+const mapUpstreamStatus = (status: number): number => {
+	if (status === 404) return HttpStatus.NOT_FOUND;
 	if (status === 429) return HttpStatus.TOO_MANY_REQUESTS;
-	if (status === 401) return HttpStatus.BAD_GATEWAY;
-	if (status >= 500) return HttpStatus.BAD_GATEWAY;
 	return HttpStatus.BAD_GATEWAY;
 };
 
-export const throwBlizzardError = async (response: Response, what: string): Promise<never> => {
-	const text = await response.text();
-	const status = mapErrorStatus(response.status);
+const clientMessage = (apiStatus: number): string => {
+	if (apiStatus === HttpStatus.NOT_FOUND) {
+		return 'Character not found.';
+	}
+	if (apiStatus === HttpStatus.TOO_MANY_REQUESTS) {
+		return 'Too many requests. Try again later.';
+	}
+	return 'Character data is temporarily unavailable. Try again later.';
+};
+
+const throwUpstreamError = async (
+	response: Response,
+	source: UpstreamSource,
+	what: string,
+): Promise<never> => {
+	const body = await response.text();
+	const upstreamStatus = response.status;
+	const apiStatus = mapUpstreamStatus(upstreamStatus);
+
+	logger.error(
+		`${source} ${what} failed: upstream=${upstreamStatus} mapped=${apiStatus} body=${body.slice(0, 500)}`,
+	);
 
 	throw new HttpException(
 		{
-			status,
-			message: `Blizzard ${what} failed. Status: ${response.status}. Error: ${text}`,
+			status: apiStatus,
+			message: clientMessage(apiStatus),
 		},
-		status,
+		apiStatus,
 	);
 };
 
-export const throwRaiderError = async (response: Response, what: string): Promise<never> => {
-	const text = await response.text();
-	const status = mapErrorStatus(response.status);
+export const throwBlizzardError = (response: Response, what: string) =>
+	throwUpstreamError(response, 'Blizzard', what);
 
-	throw new HttpException(
-		{
-			status,
-			message: `Raider ${what} failed. Status: ${response.status}. Error: ${text}`,
-		},
-		status,
-	);
-};
+export const throwRaiderError = (response: Response, what: string) =>
+	throwUpstreamError(response, 'Raider', what);

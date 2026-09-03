@@ -1,12 +1,11 @@
 'use client';
 
-import { TalentNode } from '@/entities/character/model/CharacterTalents';
+import { TalentNode } from '@/entities/character';
 import { PreviewCard } from '@base-ui/react';
 import { ReactNode } from 'react';
-import { cn } from '../lib/utils';
 import Image from 'next/image';
-
-const ENCHANT_GREEN = '#1eff00';
+import { ENCHANT_GREEN } from '@/shared/lib/enchant';
+import { cn } from '@/shared/lib/utils';
 
 const talentMeta = (node: TalentNode) => {
 	if (node.rank > 1) {
@@ -64,6 +63,7 @@ const TalentTooltipCard = ({
 				<Image
 					src={icon}
 					alt=""
+					aria-hidden
 					width={40}
 					height={40}
 					className={cn(
@@ -146,7 +146,13 @@ export const TalentHover = ({ node, children }: { node: TalentNode; children: Re
 			<PreviewCard.Trigger
 				delay={80}
 				closeDelay={60}
-				render={<div className="relative cursor-pointer outline-none" />}
+				render={
+					<button
+						type="button"
+						className="relative inline-flex cursor-pointer border-0 bg-transparent p-0 leading-none outline-none"
+						aria-label={node.name || 'Talent'}
+					/>
+				}
 			>
 				{children}
 			</PreviewCard.Trigger>
@@ -203,6 +209,7 @@ export const TalentNodeIcon = ({ node, accent }: { node: TalentNode; accent: str
 					<Image
 						src={node.icon}
 						alt=""
+						aria-hidden
 						width={36}
 						height={36}
 						className="size-full object-cover"

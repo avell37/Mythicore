@@ -3,16 +3,62 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import { useMotionReady } from '@/shared/lib/use-motion-ready';
 import { WOW_CLASSES } from '@/shared/lib/wow-classes';
 import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
 import { SidebarProps } from '../types/sidebar.types';
+
+const FOCUSABLE =
+	'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
 export const Sidebar = ({ open, onClose, onFindCharacter }: SidebarProps) => {
 	const pathname = usePathname();
 	const motionReady = useMotionReady();
+	const panelRef = useRef<HTMLElement>(null);
+
+	useEffect(() => {
+		if (!open) return;
+
+		const panel = panelRef.current;
+		if (!panel) return;
+
+		const previous = document.activeElement as HTMLElement | null;
+		const focusables = () => Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE));
+		focusables()[0]?.focus();
+
+		const onKey = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') {
+				onClose();
+				return;
+			}
+
+			if (event.key !== 'Tab') return;
+
+			const items = focusables();
+			if (!items.length) return;
+
+			const first = items[0];
+			const last = items[items.length - 1];
+
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
+			}
+		};
+
+		document.addEventListener('keydown', onKey);
+		return () => {
+			document.removeEventListener('keydown', onKey);
+			previous?.focus();
+		};
+	}, [open, onClose]);
 
 	return (
 		<>
@@ -26,10 +72,15 @@ export const Sidebar = ({ open, onClose, onFindCharacter }: SidebarProps) => {
 			/>
 
 			<aside
+				ref={panelRef}
 				className={cn(
 					'fixed inset-y-0 left-0 z-50 flex w-70 flex-col border-r border-sidebar-border bg-sidebar/95 backdrop-blur-md transition-transform duration-300 lg:static lg:z-auto lg:translate-x-0',
 					open ? 'translate-x-0' : '-translate-x-full',
 				)}
+				id="site-navigation"
+				role={open ? 'dialog' : 'navigation'}
+				aria-modal={open || undefined}
+				aria-label="Site navigation"
 			>
 				<div className="flex items-center justify-between gap-3 px-5 pt-5 pb-4">
 					<Link href="/" className="group flex min-w-0 flex-col" onClick={onClose}>
@@ -40,28 +91,26 @@ export const Sidebar = ({ open, onClose, onFindCharacter }: SidebarProps) => {
 							Meta & armory
 						</span>
 					</Link>
-					<button
-						type="button"
+					<Button
 						onClick={onClose}
-						className="grid size-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground lg:hidden"
+						className="grid size-8 place-items-center bg-transparent p-0 text-muted-foreground hover:bg-sidebar-accent hover:text-foreground lg:hidden"
 						aria-label="Close menu"
 					>
 						<X className="size-4" />
-					</button>
+					</Button>
 				</div>
 
 				<div className="px-3 pb-3">
-					<button
-						type="button"
+					<Button
 						onClick={() => {
 							onFindCharacter();
 							onClose();
 						}}
-						className="flex w-full items-center gap-2.5 rounded-md bg-primary px-3 py-2.5 text-left text-sm font-semibold text-primary-foreground transition-[filter,transform] hover:brightness-110 active:translate-y-px"
+						className="w-full justify-start gap-2.5 bg-primary px-3 py-2.5 text-left text-primary-foreground"
 					>
 						<Search className="size-4 shrink-0 opacity-90" />
 						Find your character
-					</button>
+					</Button>
 				</div>
 
 				<div className="px-5 pb-2">
@@ -74,7 +123,7 @@ export const Sidebar = ({ open, onClose, onFindCharacter }: SidebarProps) => {
 					<ul className="flex flex-col gap-0.5">
 						{WOW_CLASSES.map((wowClass, index) => {
 							const href = `/meta/${wowClass.slug}`;
-							const active = pathname.startsWith(href);
+							const active = pathname?.startsWith(href);
 
 							return (
 								<motion.li
@@ -108,6 +157,7 @@ export const Sidebar = ({ open, onClose, onFindCharacter }: SidebarProps) => {
 											<Image
 												src={wowClass.icon}
 												alt=""
+												aria-hidden
 												width={28}
 												height={28}
 												className="size-full object-cover"

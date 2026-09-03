@@ -1,13 +1,31 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RedisService } from 'src/core/redis/redis.service';
+import { CACHE_TTL } from 'src/shared/utils/cache-ttl';
 import { normalizeName, normalizeRealm, normalizeRegion } from 'src/shared/utils/normalize';
 import { BlizzardService } from '../blizzard/blizzard.service';
-
+import type {
+	BlizzardCharacterSummary,
+	BlizzardEquipmentResponse,
+	BlizzardMediaResponse,
+} from '../blizzard/types/blizzard.types';
 import { RaiderService } from '../raider/raider.service';
-import { mapPve } from './utils/map-pve';
+import { characterCacheKey } from './cache-keys';
+import { IconService } from './icon.service';
+import { TalentService } from './talent.service';
+import type {
+	Character,
+	CharacterBuild,
+	CharacterMedia,
+	CharacterPve,
+	CharacterTitles,
+	EquippedItem,
+} from './types/character.types';
 import { throwBlizzardError, throwRaiderError } from './utils/http-errors';
+import { mapBuild } from './utils/map-build';
 import { mapEquipment } from './utils/map-equipment';
-import { mapBuild, nodesOfHero, parseTalentTreeHref } from './utils/map-build';
+import { mapPve } from './utils/map-pve';
+import { mapSummary } from './utils/map-summary';
+import { mapTitles } from './utils/map-titles';
 
 @Injectable()
 export class CharacterService {
@@ -15,91 +33,73 @@ export class CharacterService {
 		private readonly redis: RedisService,
 		private readonly blizzard: BlizzardService,
 		private readonly raider: RaiderService,
+		private readonly icons: IconService,
+		private readonly talents: TalentService,
 	) {}
 
-	async getCharacterSummary(region, realm, name) {
-		const normalizedRegion = normalizeRegion(region);
-		const normalizedRealm = normalizeRealm(realm);
-		const normalizedName = normalizeName(name);
+	async getCharacterSummary(region: string, realm: string, name: string): Promise<Character> {
+		const lookup = this.normalizeLookup(region, realm, name);
+		const cacheKey = characterCacheKey.summary(lookup.region, lookup.realm, lookup.name);
 
-		const cacheKey = `char:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
-
-		const cached = await this.redis.getJson(cacheKey);
+		const cached = await this.redis.getJson<Character>(cacheKey);
 		if (cached) return cached;
 
 		const response = await this.blizzard.fetchCharacterSummary(
-			normalizedRegion,
-			normalizedRealm,
-			normalizedName,
+			lookup.region,
+			lookup.realm,
+			lookup.name,
 		);
+		if (!response.ok) await throwBlizzardError(response, 'summary');
 
-		if (!response.ok) {
-			await throwBlizzardError(response, 'summary');
-		}
-
-		const data = await response.json();
-
-		await this.redis.setJson(cacheKey, data, 900);
-
-		return data;
+		const character = mapSummary((await response.json()) as BlizzardCharacterSummary);
+		await this.redis.setJson(cacheKey, character, CACHE_TTL.success);
+		return character;
 	}
 
-	async getCharacterMedia(region, realm, name) {
-		const normalizedRegion = normalizeRegion(region);
-		const normalizedRealm = normalizeRealm(realm);
-		const normalizedName = normalizeName(name);
+	async getCharacterMedia(region: string, realm: string, name: string): Promise<CharacterMedia> {
+		const lookup = this.normalizeLookup(region, realm, name);
+		const cacheKey = characterCacheKey.media(lookup.region, lookup.realm, lookup.name);
 
-		const cacheKey = `char:media:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
-
-		const cached = await this.redis.getJson(cacheKey);
+		const cached = await this.redis.getJson<CharacterMedia>(cacheKey);
 		if (cached) return cached;
 
 		const response = await this.blizzard.fetchCharacterMedia(
-			normalizedRegion,
-			normalizedRealm,
-			normalizedName,
+			lookup.region,
+			lookup.realm,
+			lookup.name,
 		);
+		if (!response.ok) await throwBlizzardError(response, 'media');
 
-		if (!response.ok) {
-			await throwBlizzardError(response, 'media');
-		}
-
-		const data = await response.json();
-
-		const media = {
-			avatar: data.assets?.find((a) => a.key === 'avatar')?.value ?? null,
-			inset: data.assets?.find((a) => a.key === 'inset')?.value ?? null,
-			main: data.assets?.find((a) => a.key === 'main-raw')?.value ?? null,
+		const data = (await response.json()) as BlizzardMediaResponse;
+		const media: CharacterMedia = {
+			avatar: data.assets?.find((asset) => asset.key === 'avatar')?.value ?? null,
+			inset: data.assets?.find((asset) => asset.key === 'inset')?.value ?? null,
+			main: data.assets?.find((asset) => asset.key === 'main-raw')?.value ?? null,
 		};
 
-		await this.redis.setJson(cacheKey, media, 900);
-
+		await this.redis.setJson(cacheKey, media, CACHE_TTL.success);
 		return media;
 	}
 
-	async getCharacterEquipment(region, realm, name) {
-		const normalizedRegion = normalizeRegion(region);
-		const normalizedRealm = normalizeRealm(realm);
-		const normalizedName = normalizeName(name);
+	async getCharacterEquipment(
+		region: string,
+		realm: string,
+		name: string,
+	): Promise<Record<string, EquippedItem>> {
+		const lookup = this.normalizeLookup(region, realm, name);
+		const cacheKey = characterCacheKey.equipment(lookup.region, lookup.realm, lookup.name);
 
-		const cacheKey = `char:equip:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
-
-		const cached = await this.redis.getJson(cacheKey);
+		const cached = await this.redis.getJson<Record<string, EquippedItem>>(cacheKey);
 		if (cached) return cached;
 
 		const response = await this.blizzard.fetchCharacterEquipment(
-			normalizedRegion,
-			normalizedRealm,
-			normalizedName,
+			lookup.region,
+			lookup.realm,
+			lookup.name,
 		);
+		if (!response.ok) await throwBlizzardError(response, 'equipment');
 
-		if (!response.ok) {
-			await throwBlizzardError(response, 'equipment');
-		}
-
-		const data = await response.json();
-		const equipment = mapEquipment(data);
-
+		const equipment = mapEquipment((await response.json()) as BlizzardEquipmentResponse);
 		const ids = [
 			...new Set(
 				Object.values(equipment)
@@ -112,292 +112,141 @@ export class CharacterService {
 			),
 		];
 
-		await Promise.all(
-			ids.map(async (itemId) => {
-				const icon = await this.getItemIcon(normalizedRegion, itemId);
-				for (const item of Object.values(equipment)) {
-					if (item.itemId === itemId) item.icon = icon;
-
-					for (const socket of item.sockets) {
-						if (socket.itemId === itemId) socket.icon = icon;
-					}
-
-					for (const ench of item.enchantments) {
-						if (ench.sourceItemId === itemId) ench.icon = icon;
-					}
-				}
-			}),
-		);
+		const icons = await this.icons.loadItemIcons(lookup.region, ids);
+		this.icons.applyEquipmentIcons(equipment, icons);
 
 		const missingIcons = Object.values(equipment).some((item) => !item.icon);
-		const ttl = missingIcons ? 45 : 900;
-
-		await this.redis.setJson(cacheKey, equipment, ttl);
-
+		await this.redis.setJson(
+			cacheKey,
+			equipment,
+			missingIcons ? CACHE_TTL.missingIcons : CACHE_TTL.success,
+		);
 		return equipment;
 	}
 
-	async getItemIcon(region: string, itemId: number): Promise<string | null> {
-		const cacheKey = `item:icon:${region}:${itemId}`;
-		const cached = await this.redis.get(cacheKey);
+	async getCharacterTalents(
+		region: string,
+		realm: string,
+		name: string,
+	): Promise<CharacterBuild> {
+		const lookup = this.normalizeLookup(region, realm, name);
+		const cacheKey = characterCacheKey.build(lookup.region, lookup.realm, lookup.name);
+
+		const cached = await this.redis.getJson<CharacterBuild>(cacheKey);
 		if (cached) return cached;
 
-		const res = await this.blizzard.fetchItemMedia(region, itemId);
-		if (!res.ok) return null;
-
-		const data = await res.json();
-		const icon = data.assets?.find((a) => a.key === 'icon')?.value ?? null;
-		if (icon) await this.redis.set(cacheKey, icon, 60 * 60 * 24 * 7);
-
-		return icon;
-	}
-
-	async getCharacterSpecializations(region, realm, name) {
-		const normalizedRegion = normalizeRegion(region);
-		const normalizedRealm = normalizeRealm(realm);
-		const normalizedName = normalizeName(name);
-
-		const response = await this.blizzard.fetchCharacterSpecializations(
-			normalizedRegion,
-			normalizedRealm,
-			normalizedName,
-		);
-
-		if (!response.ok) {
-			await throwBlizzardError(response, 'specializations');
-		}
-
-		const data = await response.json();
-
-		const specId = data.active_specialization?.id;
-		if (!specId) {
-			throw new NotFoundException({
-				status: 404,
-				message: 'Character has no active specialization',
-			});
-		}
-
-		const specName = data.active_specialization?.name;
-		const specBlock = data.specializations?.find((spec) => spec.specialization?.id === specId);
-		const loadout =
-			specBlock?.loadouts?.find((load) => load.is_active) ?? specBlock?.loadouts?.[0];
-
-		const fromLoadout =
-			parseTalentTreeHref(loadout?.selected_class_talent_tree?.key?.href) ??
-			parseTalentTreeHref(loadout?.selected_spec_talent_tree?.key?.href);
-
-		let treeId = fromLoadout?.treeId ?? null;
-
-		if (!treeId) {
-			treeId = await this.resolveTreeIdFromIndex(normalizedRegion, specId);
-		}
-
-		const hero =
-			parseTalentTreeHref(data.active_hero_talent_tree?.key?.href) ??
-			parseTalentTreeHref(loadout?.selected_hero_talent_tree?.key?.href);
-
-		return {
-			specId,
-			specName,
-			loadout: loadout ?? null,
-			treeId,
-			heroTreeId: hero?.heroTreeId ?? null,
-			heroName:
-				data.active_hero_talent_tree?.name ??
-				loadout?.selected_hero_talent_tree?.name ??
-				null,
-		};
-	}
-
-	async getCharacterTalents(region, realm, name) {
-		const normalizedRegion = normalizeRegion(region);
-		const normalizedRealm = normalizeRealm(realm);
-		const normalizedName = normalizeName(name);
-
-		const cacheKey = `char:build:v3:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
-		const cached = await this.redis.getJson(cacheKey);
-		if (cached) return cached;
-
-		const picks = await this.getCharacterSpecializations(
-			normalizedRegion,
-			normalizedRealm,
-			normalizedName,
+		const picks = await this.talents.getCharacterSpecializations(
+			lookup.region,
+			lookup.realm,
+			lookup.name,
 		);
 
 		const tree = picks.treeId
-			? await this.getTalentTree(normalizedRegion, picks.treeId, picks.specId)
+			? await this.talents.getTalentTree(lookup.region, picks.treeId, picks.specId)
 			: null;
 
-		const heroTrees = await Promise.all(
-			(tree.hero_talent_trees ?? []).map((listing) =>
-				this.resolveHeroTree(normalizedRegion, picks.treeId, listing),
-			),
+		const heroTrees = await this.talents.resolveHeroTrees(
+			lookup.region,
+			picks.treeId,
+			tree?.hero_talent_trees ?? [],
 		);
 
 		const build = mapBuild(picks, tree, heroTrees);
-
 		const trees = [build.classTree, build.specTree, ...build.heroTrees];
 		const ids = [
 			...new Set(
 				trees
-					.flatMap((tree) =>
-						tree.nodes.flatMap((n) => [
-							n.spellId,
-							...(n.choices ?? []).map((choice) => choice.spellId),
+					.flatMap((talentTree) =>
+						talentTree.nodes.flatMap((node) => [
+							node.spellId,
+							...(node.choices ?? []).map((choice) => choice.spellId),
 						]),
 					)
 					.filter((id): id is number => typeof id === 'number'),
 			),
 		];
 
-		await Promise.all(
-			ids.map(async (spellId) => {
-				const icon = await this.getSpellIcon(normalizedRegion, spellId);
-				for (const tree of trees) {
-					for (const node of tree.nodes) {
-						if (node.spellId === spellId) node.icon = icon;
-						for (const choice of node.choices ?? []) {
-							if (choice.spellId === spellId) choice.icon = icon;
-						}
-					}
-				}
-			}),
-		);
+		const icons = await this.icons.loadSpellIcons(lookup.region, ids);
+		this.icons.applyTalentIcons(trees, icons);
 
-		const missingIcons = trees.some((tree) =>
-			tree.nodes.some(
-				(n) =>
-					(n.spellId && !n.icon) ||
-					(n.choices ?? []).some((choice) => choice.spellId && !choice.icon),
+		const missingIcons = trees.some((talentTree) =>
+			talentTree.nodes.some(
+				(node) =>
+					(node.spellId && !node.icon) ||
+					(node.choices ?? []).some((choice) => choice.spellId && !choice.icon),
 			),
 		);
-		const ttl = missingIcons ? 45 : 900;
-		await this.redis.setJson(cacheKey, build, ttl);
-
+		await this.redis.setJson(
+			cacheKey,
+			build,
+			missingIcons ? CACHE_TTL.missingIcons : CACHE_TTL.success,
+		);
 		return build;
 	}
 
-	async getCharacterMythicStats(region, realm, name) {
-		const normalizedRegion = normalizeRegion(region);
-		const normalizedRealm = normalizeRealm(realm);
-		const normalizedName = normalizeName(name);
+	async getCharacterPve(region: string, realm: string, name: string): Promise<CharacterPve> {
+		const lookup = this.normalizeLookup(region, realm, name);
+		const cacheKey = characterCacheKey.pve(lookup.region, lookup.realm, lookup.name);
 
-		const cacheKey = `char:mythic:${normalizedRegion}:${normalizedRealm}:${normalizedName}`;
-
-		const cached = await this.redis.getJson(cacheKey);
+		const cached = await this.redis.getJson<CharacterPve>(cacheKey);
 		if (cached) return cached;
 
-		const response = await this.raider.fetchCharacterMythicStats(
-			normalizedRegion,
-			normalizedRealm,
-			normalizedName,
+		const response = await this.raider.fetchCharacterPve(
+			lookup.region,
+			lookup.realm,
+			lookup.name,
 		);
 
 		if (!response.ok) {
 			if (response.status === 404) {
 				const empty = mapPve({});
-				await this.redis.setJson(cacheKey, empty, 900);
+				await this.redis.setJson(cacheKey, empty, CACHE_TTL.notFound);
 				return empty;
 			}
 			await throwRaiderError(response, 'character-profile');
 		}
 
-		const data = await response.json();
-		const pve = mapPve(data);
-
-		await this.redis.setJson(cacheKey, pve, 900);
-
+		const pve = mapPve(await response.json());
+		await this.redis.setJson(cacheKey, pve, CACHE_TTL.success);
 		return pve;
 	}
 
-	private async resolveTreeIdFromIndex(region: string, specId: number) {
-		const cacheKey = `talent-tree-index:${region}`;
-		let index = await this.redis.getJson<{
-			spec_talent_trees?: { key?: { href?: string } }[];
-		}>(cacheKey);
+	async getCharacterTitles(
+		region: string,
+		realm: string,
+		name: string,
+	): Promise<CharacterTitles> {
+		const lookup = this.normalizeLookup(region, realm, name);
+		const cacheKey = characterCacheKey.titles(lookup.region, lookup.realm, lookup.name);
 
-		if (!index) {
-			const res = await this.blizzard.fetchTalentTreeIndex(region);
-			if (!res.ok) await throwBlizzardError(res, 'talent-tree-index');
-			index = await res.json();
-			await this.redis.setJson(cacheKey, index, 60 * 60 * 24 * 7);
-		}
-
-		if (!index) return null;
-
-		const match = index.spec_talent_trees?.find((tree) => {
-			const parsed = parseTalentTreeHref(tree.key?.href);
-			return parsed?.specId === specId;
-		});
-
-		return parseTalentTreeHref(match?.key?.href)?.treeId ?? null;
-	}
-
-	private async getTalentTree(region, treeId, specId) {
-		const cacheKey = `talent-tree:${region}:${treeId}:${specId}`;
-		const cached = await this.redis.getJson(cacheKey);
+		const cached = await this.redis.getJson<CharacterTitles>(cacheKey);
 		if (cached) return cached;
 
-		const res = await this.blizzard.fetchTalentTree(region, treeId, specId);
-		if (!res.ok) await throwBlizzardError(res, 'talent-tree');
+		const response = await this.blizzard.fetchCharacterTitles(
+			lookup.region,
+			lookup.realm,
+			lookup.name,
+		);
 
-		const tree = await res.json();
-		await this.redis.setJson(cacheKey, tree, 60 * 60 * 24 * 7);
-
-		return tree;
-	}
-
-	private async resolveHeroTree(region, treeId, listing) {
-		const parsed = parseTalentTreeHref(listing?.key?.href);
-		const parentTreeId = parsed?.treeId ?? treeId;
-		const ids = [...new Set([parsed?.heroTreeId, listing?.id].filter(Boolean))];
-
-		for (const heroTreeId of ids) {
-			if (!parentTreeId || !heroTreeId) continue;
-
-			const fetched = await this.getHeroTalentTree(region, parentTreeId, heroTreeId);
-			const nodes = nodesOfHero(fetched);
-			if (!nodes.length) continue;
-
-			return {
-				...listing,
-				name: listing?.name ?? fetched?.name,
-				hero_talent_nodes: nodes,
-			};
+		if (!response.ok) {
+			if (response.status === 404) {
+				const empty = mapTitles({});
+				await this.redis.setJson(cacheKey, empty, CACHE_TTL.notFound);
+				return empty;
+			}
+			await throwBlizzardError(response, 'character-titles');
 		}
 
+		const titles = mapTitles(await response.json());
+		await this.redis.setJson(cacheKey, titles, CACHE_TTL.success);
+		return titles;
+	}
+
+	private normalizeLookup(region: string, realm: string, name: string) {
 		return {
-			...listing,
-			hero_talent_nodes: nodesOfHero(listing),
+			region: normalizeRegion(region),
+			realm: normalizeRealm(realm),
+			name: normalizeName(name),
 		};
-	}
-
-	private async getHeroTalentTree(region, treeId, heroTreeId) {
-		const cacheKey = `hero-tree:v2:${region}:${treeId}:${heroTreeId}`;
-		const cached = await this.redis.getJson(cacheKey);
-		if (cached) return cached;
-
-		const res = await this.blizzard.fetchHeroTalentTree(region, treeId, heroTreeId);
-		if (!res.ok) return null;
-
-		const tree = await res.json();
-		await this.redis.setJson(cacheKey, tree, 60 * 60 * 24 * 7);
-
-		return tree;
-	}
-
-	private async getSpellIcon(region: string, spellId: number) {
-		const cacheKey = `spell:icon:${region}:${spellId}`;
-		const cached = await this.redis.get(cacheKey);
-		if (cached) return cached;
-
-		const res = await this.blizzard.fetchSpellMedia(region, spellId);
-		if (!res.ok) return null;
-
-		const data = await res.json();
-		const icon = data.assets?.find((a) => a.key === 'icon')?.value ?? null;
-		if (icon) await this.redis.set(cacheKey, icon, 60 * 60 * 24 * 7);
-
-		return icon;
 	}
 }

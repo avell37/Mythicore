@@ -1,5 +1,5 @@
-import { CharacterBuild } from '@/entities/character/model/CharacterTalents';
-import { WowClass } from '@/shared/lib/wow-classes';
+import type { CharacterBuild } from '@/entities/character';
+import type { WowClass } from '@/shared/lib/wow-classes';
 
 export type TalentBuildProps = {
 	build: CharacterBuild;

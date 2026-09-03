@@ -1,10 +1,8 @@
-'use client';
-
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 export const CharacterError = ({ notFound = false }: { notFound?: boolean }) => (
-	<div className="relative mx-auto flex min-h-[60vh] w-full max-w-5xl flex-col justify-center px-5 py-12 sm:px-8 lg:px-12">
+	<div className="relative mx-auto flex min-h-[60vh] w-full max-w-6xl flex-col justify-center px-5 py-12 sm:px-8 lg:px-12">
 		<Link
 			href="/"
 			className="mb-8 inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"

@@ -35,6 +35,7 @@ export function SpecBlock({ spec, accent, index, motionReady }: SpecBlockProps) 
 					<Image
 						src={spec.icon}
 						alt=""
+						aria-hidden
 						width={44}
 						height={44}
 						className="size-full object-cover"

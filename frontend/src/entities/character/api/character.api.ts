@@ -1,61 +1,34 @@
 import { baseAxios } from '@/shared/api/http';
 import { API_URL } from '@/shared/lib/constants/api.config';
-import type {
-	Character,
-	CharacterEquipment,
-	CharacterMedia,
-	CharacterProps,
-} from '../model/Character';
+import type { Character, CharacterProps } from '../model/Character';
+import type { CharacterEquipment } from '../model/CharacterEquipment';
+import type { CharacterMedia } from '../model/CharacterMedia';
+import type { CharacterPve } from '../model/CharacterPve';
 import type { CharacterBuild } from '../model/CharacterTalents';
-import { CharacterPve } from '../model/CharacterMythic';
+import type { CharacterTitles } from '../model/CharacterTitles';
 
-export const getCharacterApi = async ({
-	region,
-	realm,
-	name,
-}: CharacterProps): Promise<Character> => {
-	const { data } = await baseAxios.get(`${API_URL.character()}/${region}/${realm}/${name}`);
+const characterPath = ({ region, realm, name }: CharacterProps, suffix = '') =>
+	`${API_URL.character()}/${region}/${realm}/${name}${suffix}`;
+
+const getCharacterResource = async <T>(lookup: CharacterProps, suffix = '') => {
+	const { data } = await baseAxios.get<T>(characterPath(lookup, suffix));
 	return data;
 };
 
-export const getCharacterMediaApi = async ({
-	region,
-	realm,
-	name,
-}: CharacterProps): Promise<CharacterMedia> => {
-	const { data } = await baseAxios.get(`${API_URL.character()}/${region}/${realm}/${name}/media`);
-	return data;
-};
+export const getCharacterApi = (lookup: CharacterProps) =>
+	getCharacterResource<Character>(lookup);
 
-export const getCharacterEquipmentApi = async ({
-	region,
-	realm,
-	name,
-}: CharacterProps): Promise<CharacterEquipment> => {
-	const { data } = await baseAxios.get(
-		`${API_URL.character()}/${region}/${realm}/${name}/equipment`,
-	);
-	return data;
-};
+export const getCharacterMediaApi = (lookup: CharacterProps) =>
+	getCharacterResource<CharacterMedia>(lookup, '/media');
 
-export const getCharacterTalentsApi = async ({
-	region,
-	realm,
-	name,
-}: CharacterProps): Promise<CharacterBuild> => {
-	const { data } = await baseAxios.get(
-		`${API_URL.character()}/${region}/${realm}/${name}/specializations`,
-	);
-	return data;
-};
+export const getCharacterEquipmentApi = (lookup: CharacterProps) =>
+	getCharacterResource<CharacterEquipment>(lookup, '/equipment');
 
-export const getCharacterMythicApi = async ({
-	region,
-	realm,
-	name,
-}: CharacterProps): Promise<CharacterPve> => {
-	const { data } = await baseAxios.get(
-		`${API_URL.character()}/${region}/${realm}/${name}/mythic`,
-	);
-	return data;
-};
+export const getCharacterTalentsApi = (lookup: CharacterProps) =>
+	getCharacterResource<CharacterBuild>(lookup, '/talents');
+
+export const getCharacterPveApi = (lookup: CharacterProps) =>
+	getCharacterResource<CharacterPve>(lookup, '/pve');
+
+export const getCharacterTitlesApi = (lookup: CharacterProps) =>
+	getCharacterResource<CharacterTitles>(lookup, '/titles');

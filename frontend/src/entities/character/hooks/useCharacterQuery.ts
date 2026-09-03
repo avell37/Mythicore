@@ -1,52 +1,61 @@
 import { useQuery } from '@tanstack/react-query';
-import type {
-	Character,
-	CharacterEquipment,
-	CharacterMedia,
-	CharacterProps,
-} from '../model/Character';
+import type { Character, CharacterProps } from '../model/Character';
+import type { CharacterEquipment } from '../model/CharacterEquipment';
+import type { CharacterMedia } from '../model/CharacterMedia';
+import type { CharacterPve } from '../model/CharacterPve';
+import type { CharacterBuild } from '../model/CharacterTalents';
+import type { CharacterTitles } from '../model/CharacterTitles';
 import {
 	getCharacterApi,
 	getCharacterEquipmentApi,
 	getCharacterMediaApi,
-	getCharacterMythicApi,
+	getCharacterPveApi,
 	getCharacterTalentsApi,
+	getCharacterTitlesApi,
 } from '../api/character.api';
-import { characterKeys } from '@/shared/api/query-keys';
-import { CharacterBuild } from '../model/CharacterTalents';
-import { CharacterPve } from '../model/CharacterMythic';
+import { characterKeys } from '../api/query-keys';
 
-export const useGetCharacterQuery = ({ region, realm, name }: CharacterProps) =>
-	useQuery<Character>({
-		queryKey: characterKeys.getCharacter({ region, realm, name }),
-		queryFn: () => getCharacterApi({ region, realm, name }),
-		enabled: Boolean(region && realm && name),
-	});
+const isLookupReady = ({ region, realm, name }: CharacterProps) =>
+	Boolean(region && realm && name);
 
-export const useGetCharacterMediaQuery = ({ region, realm, name }: CharacterProps) =>
-	useQuery<CharacterMedia>({
-		queryKey: characterKeys.getCharacterMedia({ region, realm, name }),
-		queryFn: () => getCharacterMediaApi({ region, realm, name }),
-		enabled: Boolean(region && realm && name),
-	});
+const createCharacterQuery = <T>(
+	getKey: (lookup: CharacterProps) => readonly unknown[],
+	queryFn: (lookup: CharacterProps) => Promise<T>,
+) => {
+	return (lookup: CharacterProps, enabled = true) =>
+		useQuery({
+			queryKey: getKey(lookup),
+			queryFn: () => queryFn(lookup),
+			enabled: enabled && isLookupReady(lookup),
+		});
+};
 
-export const useGetCharacterEquipmentQuery = ({ region, realm, name }: CharacterProps) =>
-	useQuery<CharacterEquipment>({
-		queryKey: characterKeys.getCharacterEquipment({ region, realm, name }),
-		queryFn: () => getCharacterEquipmentApi({ region, realm, name }),
-		enabled: Boolean(region && realm && name),
-	});
+export const useGetCharacterQuery = createCharacterQuery<Character>(
+	characterKeys.getCharacter,
+	getCharacterApi,
+);
 
-export const useGetCharacterTalentsQuery = ({ region, realm, name }: CharacterProps) =>
-	useQuery<CharacterBuild>({
-		queryKey: characterKeys.getCharacterTalents({ region, realm, name }),
-		queryFn: () => getCharacterTalentsApi({ region, realm, name }),
-		enabled: Boolean(region && realm && name),
-	});
+export const useGetCharacterMediaQuery = createCharacterQuery<CharacterMedia>(
+	characterKeys.getCharacterMedia,
+	getCharacterMediaApi,
+);
 
-export const useGetCharacterMythicQuery = ({ region, realm, name }: CharacterProps) =>
-	useQuery<CharacterPve>({
-		queryKey: characterKeys.getCharacterMythic({ region, realm, name }),
-		queryFn: () => getCharacterMythicApi({ region, realm, name }),
-		enabled: Boolean(region && realm && name),
-	});
+export const useGetCharacterEquipmentQuery = createCharacterQuery<CharacterEquipment>(
+	characterKeys.getCharacterEquipment,
+	getCharacterEquipmentApi,
+);
+
+export const useGetCharacterTalentsQuery = createCharacterQuery<CharacterBuild>(
+	characterKeys.getCharacterTalents,
+	getCharacterTalentsApi,
+);
+
+export const useGetCharacterPveQuery = createCharacterQuery<CharacterPve>(
+	characterKeys.getCharacterPve,
+	getCharacterPveApi,
+);
+
+export const useGetCharacterTitlesQuery = createCharacterQuery<CharacterTitles>(
+	characterKeys.getCharacterTitles,
+	getCharacterTitlesApi,
+);

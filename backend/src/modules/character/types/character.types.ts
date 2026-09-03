@@ -1,3 +1,52 @@
+export type CharacterLookup = {
+	region: string;
+	realm: string;
+	name: string;
+};
+
+export type Character = {
+	id: number;
+	name: string;
+	gender: {
+		type: string;
+		name: string;
+	};
+	faction: {
+		type: string;
+		name: string;
+	};
+	race: {
+		name: string;
+		id: number;
+	};
+	character_class: {
+		name: string;
+		id: number;
+	};
+	active_spec?: {
+		name: string;
+		id: number;
+	};
+	realm: {
+		name: string;
+		id: number;
+		slug: string;
+	};
+	level: number;
+	experience: number;
+	achievement_points: number;
+	last_login_timestamp: number;
+	average_item_level: number;
+	equipped_item_level: number;
+	is_remix?: boolean;
+};
+
+export type CharacterMedia = {
+	avatar: string | null;
+	inset: string | null;
+	main: string | null;
+};
+
 export type ItemStat = {
 	type: string;
 	name: string;
@@ -124,7 +173,6 @@ export type PveKeyRun = {
 	clearTimeMs: number;
 	parTimeMs: number;
 	completedAt: string | null;
-	url: string | null;
 };
 
 export type PveRaid = {
@@ -149,7 +197,19 @@ export type CharacterPve = {
 		};
 		bestRuns: PveKeyRun[];
 		recentRuns: PveKeyRun[];
-		weeklyRuns: PveKeyRun[];
 	};
 	raids: PveRaid[];
+};
+
+export type CharacterTitle = {
+	id: number;
+	name: string;
+	displayString: string;
+	isActive: boolean;
+};
+
+export type CharacterTitles = {
+	active: CharacterTitle | null;
+	total: number;
+	titles: CharacterTitle[];
 };

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Fira_Sans } from 'next/font/google';
-import { AppShell } from '@/widgets/sidebar/ui/AppShell';
-import { Providers } from '../shared/providers/providers';
+import { Providers } from '@/shared/providers/providers';
+import { AppShell } from '@/widgets/sidebar';
 import './globals.css';
 
 const firaSans = Fira_Sans({

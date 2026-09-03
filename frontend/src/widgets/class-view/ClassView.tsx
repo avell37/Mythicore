@@ -33,7 +33,7 @@ export const ClassView = ({ wowClass }: { wowClass: WowClass }) => {
 					>
 						<Image
 							src={wowClass.icon}
-							alt=""
+							alt={`${wowClass.name} icon`}
 							width={64}
 							height={64}
 							className="size-full object-cover"

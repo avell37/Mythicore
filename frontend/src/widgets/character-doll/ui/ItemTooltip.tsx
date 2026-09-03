@@ -2,14 +2,13 @@ import type {
 	EquippedItem,
 	ItemEnchantment,
 	ItemSocket,
-} from '@/entities/character/model/Character';
+} from '@/entities/character';
+import { ENCHANT_GREEN } from '@/shared/lib/enchant';
 import { TinyIcon } from '@/shared/ui/tiny-icon';
-
-const ENCHANT_GREEN = '#1eff00';
 
 const EnchantRow = ({ ench }: { ench: ItemEnchantment }) => (
 	<div className="flex items-start gap-1.5">
-		<TinyIcon src={ench.icon} alt="" />
+		<TinyIcon src={ench.icon} alt={ench.sourceItemName ?? ench.display} />
 		<p
 			className="text-sm leading-snug"
 			style={{ color: ench.slot === 'TEMPORARY' ? '#80e0ff' : ENCHANT_GREEN }}
@@ -26,7 +25,7 @@ const SocketRow = ({ socket }: { socket: ItemSocket }) => {
 	return (
 		<div className="flex items-start gap-1.5">
 			{filled && socket.icon ? (
-				<TinyIcon src={socket.icon} alt="" />
+				<TinyIcon src={socket.icon} alt={socket.itemName ?? socket.name ?? socket.type} />
 			) : (
 				<span className="mt-1 flex size-4 shrink-0 items-center justify-center">
 					<span
