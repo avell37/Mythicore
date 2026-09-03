@@ -5,6 +5,7 @@ export {
 	useGetCharacterTalentsQuery,
 	useGetCharacterPveQuery,
 	useGetCharacterTitlesQuery,
+	useGetCharacterReputationsQuery,
 } from './hooks/useCharacterQuery';
 
 export { characterKeys } from './api/query-keys';
@@ -20,6 +21,11 @@ export type {
 	ItemEnchantment,
 } from './model/CharacterEquipment';
 export type { CharacterTitle, CharacterTitles } from './model/CharacterTitles';
+export type {
+	CharacterReputation,
+	CharacterReputations,
+	CharacterReputationParagon,
+} from './model/CharacterReputations';
 
 export type {
 	CharacterBuild,

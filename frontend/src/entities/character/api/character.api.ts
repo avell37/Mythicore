@@ -6,6 +6,7 @@ import type { CharacterMedia } from '../model/CharacterMedia';
 import type { CharacterPve } from '../model/CharacterPve';
 import type { CharacterBuild } from '../model/CharacterTalents';
 import type { CharacterTitles } from '../model/CharacterTitles';
+import type { CharacterReputations } from '../model/CharacterReputations';
 
 const characterPath = ({ region, realm, name }: CharacterProps, suffix = '') =>
 	`${API_URL.character()}/${region}/${realm}/${name}${suffix}`;
@@ -15,8 +16,7 @@ const getCharacterResource = async <T>(lookup: CharacterProps, suffix = '') => {
 	return data;
 };
 
-export const getCharacterApi = (lookup: CharacterProps) =>
-	getCharacterResource<Character>(lookup);
+export const getCharacterApi = (lookup: CharacterProps) => getCharacterResource<Character>(lookup);
 
 export const getCharacterMediaApi = (lookup: CharacterProps) =>
 	getCharacterResource<CharacterMedia>(lookup, '/media');
@@ -32,3 +32,6 @@ export const getCharacterPveApi = (lookup: CharacterProps) =>
 
 export const getCharacterTitlesApi = (lookup: CharacterProps) =>
 	getCharacterResource<CharacterTitles>(lookup, '/titles');
+
+export const getCharacterReputationsApi = (lookup: CharacterProps) =>
+	getCharacterResource<CharacterReputations>(lookup, '/reputations');

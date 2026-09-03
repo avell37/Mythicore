@@ -11,6 +11,7 @@ import {
 	type CharacterMedia,
 	type CharacterPve,
 	type CharacterTitles,
+	type CharacterReputations,
 } from '@/entities/character';
 import { getWowClassByName } from '@/shared/lib/wow-classes';
 import { ErrorBoundary } from '@/shared/ui/error-boundary';
@@ -19,6 +20,10 @@ import { CharacterDoll } from '@/widgets/character-doll';
 import { CharacterHero, CharacterStats, getCharacterStats } from '@/widgets/character-view';
 import { CharacterPvePanel, CharacterPveSkeleton } from '@/widgets/character-pve';
 import { CharacterTitlesPanel, CharacterTitlesSkeleton } from '@/widgets/character-titles';
+import {
+	CharacterReputationsPanel,
+	CharacterReputationsSkeleton,
+} from '@/widgets/character-reputations';
 import { TalentBuild, TalentBuildSkeleton } from '@/widgets/talent-build';
 import { isCharacterTab, type CharacterTab } from '../model/tabs';
 import { SectionCrash } from './SectionCrash';
@@ -45,6 +50,9 @@ type CharacterProfileProps = {
 	titles?: CharacterTitles;
 	isTitlesPending?: boolean;
 	isTitlesError?: boolean;
+	reputations?: CharacterReputations;
+	isReputationsPending?: boolean;
+	isReputationsError?: boolean;
 };
 
 export const CharacterProfile = ({
@@ -68,6 +76,9 @@ export const CharacterProfile = ({
 	titles,
 	isTitlesPending,
 	isTitlesError,
+	reputations,
+	isReputationsPending,
+	isReputationsError,
 }: CharacterProfileProps) => {
 	const wowClass = getWowClassByName(character.character_class.name);
 	const accent = wowClass?.color ?? getFactionAccent(character.faction?.type);
@@ -107,11 +118,12 @@ export const CharacterProfile = ({
 					}}
 					className="gap-4"
 				>
-					<TabsList>
+					<TabsList className="max-w-full flex-wrap">
 						<TabsTrigger value="overview">Overview</TabsTrigger>
 						<TabsTrigger value="talents">Talents</TabsTrigger>
 						<TabsTrigger value="pve">PvE</TabsTrigger>
 						<TabsTrigger value="titles">Titles</TabsTrigger>
+						<TabsTrigger value="reputations">Reputations</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="overview" className="space-y-4">
@@ -182,6 +194,24 @@ export const CharacterProfile = ({
 								</UnavailableNote>
 							) : (
 								<CharacterTitlesPanel titles={titles} accent={accent} />
+							)}
+						</ErrorBoundary>
+					</TabsContent>
+
+					<TabsContent value="reputations">
+						<ErrorBoundary fallback={<SectionCrash />}>
+							{activeTab !== 'reputations' ? null : isReputationsPending ? (
+								<CharacterReputationsSkeleton />
+							) : isReputationsError || !reputations ? (
+								<UnavailableNote>
+									Reputations are unavailable. The character may need to log out
+									in-game.
+								</UnavailableNote>
+							) : (
+								<CharacterReputationsPanel
+									reputations={reputations}
+									accent={accent}
+								/>
 							)}
 						</ErrorBoundary>
 					</TabsContent>

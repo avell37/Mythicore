@@ -9,6 +9,7 @@ import {
 	useGetCharacterQuery,
 	useGetCharacterTalentsQuery,
 	useGetCharacterTitlesQuery,
+	useGetCharacterReputationsQuery,
 	type CharacterProps,
 } from '@/entities/character';
 import { useMotionReady } from '@/shared/lib/use-motion-ready';
@@ -48,6 +49,11 @@ export const CharacterPage = ({ region, realm, name }: CharacterProps) => {
 		isPending: isTitlesPending,
 		isError: isTitlesError,
 	} = useGetCharacterTitlesQuery(lookup, activeTab === 'titles');
+	const {
+		data: reputations,
+		isPending: isReputationsPending,
+		isError: isReputationsError,
+	} = useGetCharacterReputationsQuery(lookup, activeTab === 'reputations');
 
 	if (isPending) {
 		return <CharacterPageSkeleton />;
@@ -80,6 +86,9 @@ export const CharacterPage = ({ region, realm, name }: CharacterProps) => {
 			titles={titles}
 			isTitlesPending={isTitlesPending}
 			isTitlesError={isTitlesError}
+			reputations={reputations}
+			isReputationsPending={isReputationsPending}
+			isReputationsError={isReputationsError}
 		/>
 	);
 };

@@ -1,6 +1,5 @@
 export const characterCacheKey = {
-	summary: (region: string, realm: string, name: string) =>
-		`char:v2:${region}:${realm}:${name}`,
+	summary: (region: string, realm: string, name: string) => `char:v2:${region}:${realm}:${name}`,
 	media: (region: string, realm: string, name: string) =>
 		`char:media:v2:${region}:${realm}:${name}`,
 	equipment: (region: string, realm: string, name: string) =>
@@ -10,6 +9,8 @@ export const characterCacheKey = {
 	pve: (region: string, realm: string, name: string) => `char:pve:v2:${region}:${realm}:${name}`,
 	titles: (region: string, realm: string, name: string) =>
 		`char:titles:v2:${region}:${realm}:${name}`,
+	reputations: (region: string, realm: string, name: string) =>
+		`char:reps:v1:${region}:${realm}:${name}`,
 	itemIcon: (region: string, itemId: number) => `item:icon:${region}:${itemId}`,
 	spellIcon: (region: string, spellId: number) => `spell:icon:${region}:${spellId}`,
 	talentTreeIndex: (region: string) => `talent-tree-index:${region}`,

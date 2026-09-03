@@ -15,7 +15,11 @@ export class CharacterController {
 
 	@Get(':region/:realm/:name/equipment')
 	getCharacterEquipment(@Param() params: CharacterLookupDto) {
-		return this.characterService.getCharacterEquipment(params.region, params.realm, params.name);
+		return this.characterService.getCharacterEquipment(
+			params.region,
+			params.realm,
+			params.name,
+		);
 	}
 
 	@Get(':region/:realm/:name/talents')
@@ -31,6 +35,15 @@ export class CharacterController {
 	@Get(':region/:realm/:name/titles')
 	getCharacterTitles(@Param() params: CharacterLookupDto) {
 		return this.characterService.getCharacterTitles(params.region, params.realm, params.name);
+	}
+
+	@Get(':region/:realm/:name/reputations')
+	getCharacterReputations(@Param() params: CharacterLookupDto) {
+		return this.characterService.getCharacterReputations(
+			params.region,
+			params.realm,
+			params.name,
+		);
 	}
 
 	@Get(':region/:realm/:name')

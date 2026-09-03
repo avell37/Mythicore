@@ -21,7 +21,11 @@ export class BlizzardService {
 	}
 
 	async fetchCharacterMedia(region: string, realm: string, name: string) {
-		return this.blizzardFetch(this.characterPath(realm, name, '/character-media'), region, 'profile');
+		return this.blizzardFetch(
+			this.characterPath(realm, name, '/character-media'),
+			region,
+			'profile',
+		);
 	}
 
 	async fetchCharacterEquipment(region: string, realm: string, name: string) {
@@ -38,6 +42,14 @@ export class BlizzardService {
 
 	async fetchCharacterTitles(region: string, realm: string, name: string) {
 		return this.blizzardFetch(this.characterPath(realm, name, '/titles'), region, 'profile');
+	}
+
+	async fetchCharacterReputations(region: string, realm: string, name: string) {
+		return this.blizzardFetch(
+			this.characterPath(realm, name, '/reputations'),
+			region,
+			'profile',
+		);
 	}
 
 	async fetchItemMedia(region: string, itemId: number) {

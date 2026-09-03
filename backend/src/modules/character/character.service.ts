@@ -7,6 +7,7 @@ import type {
 	BlizzardCharacterSummary,
 	BlizzardEquipmentResponse,
 	BlizzardMediaResponse,
+	BlizzardReputationsResponse,
 } from '../blizzard/types/blizzard.types';
 import { RaiderService } from '../raider/raider.service';
 import { characterCacheKey } from './cache-keys';
@@ -17,6 +18,7 @@ import type {
 	CharacterBuild,
 	CharacterMedia,
 	CharacterPve,
+	CharacterReputations,
 	CharacterTitles,
 	EquippedItem,
 } from './types/character.types';
@@ -26,6 +28,7 @@ import { mapEquipment } from './utils/map-equipment';
 import { mapPve } from './utils/map-pve';
 import { mapSummary } from './utils/map-summary';
 import { mapTitles } from './utils/map-titles';
+import { mapReputations } from './utils/map-reputations';
 
 @Injectable()
 export class CharacterService {
@@ -240,6 +243,37 @@ export class CharacterService {
 		const titles = mapTitles(await response.json());
 		await this.redis.setJson(cacheKey, titles, CACHE_TTL.success);
 		return titles;
+	}
+
+	async getCharacterReputations(
+		region: string,
+		realm: string,
+		name: string,
+	): Promise<CharacterReputations> {
+		const lookup = this.normalizeLookup(region, realm, name);
+		const cacheKey = characterCacheKey.reputations(lookup.region, lookup.realm, lookup.name);
+
+		const cached = await this.redis.getJson<CharacterReputations>(cacheKey);
+		if (cached) return cached;
+
+		const response = await this.blizzard.fetchCharacterReputations(
+			lookup.region,
+			lookup.realm,
+			lookup.name,
+		);
+
+		if (!response.ok) {
+			if (response.status === 404) {
+				const empty = mapReputations({});
+				await this.redis.setJson(cacheKey, empty, CACHE_TTL.notFound);
+				return empty;
+			}
+			await throwBlizzardError(response, 'character-reputations');
+		}
+
+		const reputations = mapReputations((await response.json()) as BlizzardReputationsResponse);
+		await this.redis.setJson(cacheKey, reputations, CACHE_TTL.success);
+		return reputations;
 	}
 
 	private normalizeLookup(region: string, realm: string, name: string) {
